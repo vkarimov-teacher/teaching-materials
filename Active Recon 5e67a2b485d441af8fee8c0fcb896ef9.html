@@ -1,0 +1,805 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>Active Recon </title><meta name="data-notion-page-icon" content="🕳️"/><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ctext%20y%3D%22.9em%22%20font-size%3D%2290%22%3E%F0%9F%95%B3%EF%B8%8F%3C%2Ftext%3E%3C%2Fsvg%3E"/><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+	/* Paint a complete callout box on every PDF page fragment. */
+	-webkit-box-decoration-break: clone;
+	box-decoration-break: clone;
+}
+
+/* For default-background callouts, render the border outline. */
+.callout.block-color-default_background {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+/*
+ * Toggles and callouts hold arbitrary content, so they can easily be taller
+ * than a page. They must stay breakable: avoiding breaks inside them makes
+ * Chromium push the whole block onto the next page, which leaves the previous
+ * page mostly empty before every long toggle.
+ */
+details,
+aside {
+	margin: 1.25em 0;
+}
+
+/* Keep a toggle's title on the same page as the start of its content. */
+summary {
+	page-break-after: avoid;
+	break-after: avoid;
+}
+
+/*
+ * Toggle headings render as <h1/h2/h3 style="display:inline-block"> inside
+ * <summary>. Without this reset, the heading's margin-top pushes it below the
+ * ::marker (▼), so the triangle and the title appear on separate lines.
+ */
+summary h1,
+summary h2,
+summary h3,
+summary h4 {
+	margin-top: 0;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+
+	table.collection-content {
+		width: 100%;
+		table-layout: fixed;
+	}
+
+	table.collection-content th,
+	table.collection-content td {
+		overflow-wrap: anywhere;
+	}
+
+	table.collection-content td > .user,
+	table.collection-content td > time {
+		white-space: pre-wrap;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content-wrapper {
+	overflow-x: auto;
+}
+
+@media only print {
+	.collection-content-wrapper {
+		overflow-x: visible;
+	}
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	gap: 46px;
+}
+
+.column {
+	min-width: 0;
+	overflow: hidden;
+}
+
+.column > *:first-child {
+	margin-top: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding-inline: 0.125rem;
+	padding-block: 0.375rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+table {
+	border-collapse: collapse;
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol.numbered-list.numbered-list-digits-2 {
+	padding-inline-start: 2em;
+}
+
+ol.numbered-list.numbered-list-digits-3plus {
+	padding-inline-start: 2.4em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+/*
+ * Render emoji icons using a ::before pseudo-element to keep the glyph
+ * out of the DOM textContent traversal. This avoids double-rendering icons
+ * in callouts and page titles.
+ * NOTE(slim/html-export-pseudo-icons): I can't tagref this because it will
+ * flag as a duplicate tag after codegen.
+ */
+.icon[data-emoji]::before {
+	content: attr(data-emoji);
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	margin-right: 0.4em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.tab {
+	margin: 1.25em 0;
+	padding-inline: 1rem;
+	border: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style><style>@import url('https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex-swap.min.css')</style></head><body><article id="5e67a2b4-85d4-41af-8fee-8c0fcb896ef9" class="page sans" data-notion-page-icon="🕳️"><header><img class="page-cover-image" src="https://images.unsplash.com/photo-1439792675105-701e6a4ab6f0?ixlib=rb-4.0.3&amp;q=85&amp;fm=jpg&amp;crop=entropy&amp;cs=srgb" style="object-position:center 50%"/><div class="page-header-icon page-header-icon-with-cover"><span class="icon" data-emoji="🕳️"></span></div><h1 class="page-title" dir="auto">Active Recon </h1><p class="page-description" dir="auto"></p></header><div class="page-body"><hr id="8f1e3738-0992-4606-a5f5-ed2b44ac179f" dir="auto"/><figure id="1b7f2649-577b-80a0-a615-eb3edb5d8a15" class="link-to-page"><a href="Active%20Recon/Nmap%20Full%20Guide%201b7f2649577b80a0a615eb3edb5d8a15.html" data-notion-page-id="1b7f2649-577b-80a0-a615-eb3edb5d8a15" data-notion-space-id="fdee5189-a9e7-45ee-96b4-15e0fb90ff15"><span class="icon" data-emoji="🏂"></span>Nmap Full Guide</a></figure><figure id="1b7f2649-577b-808a-b95f-ca00fd618d92" class="link-to-page"><a href="Active%20Recon/Dirb%20full%20guide%201b7f2649577b808ab95fca00fd618d92.html" data-notion-page-id="1b7f2649-577b-808a-b95f-ca00fd618d92" data-notion-space-id="fdee5189-a9e7-45ee-96b4-15e0fb90ff15"><img class="icon notion-static-icon" src="https://www.notion.so/icons/sign-in_pink.svg"/>Dirb full guide</a></figure><figure id="1b7f2649-577b-80ca-951f-f9e7672d2318" class="link-to-page"><a href="Active%20Recon/Subdomain%20Enum%201b7f2649577b80ca951ff9e7672d2318.html" data-notion-page-id="1b7f2649-577b-80ca-951f-f9e7672d2318" data-notion-space-id="fdee5189-a9e7-45ee-96b4-15e0fb90ff15"><span class="icon" data-emoji="➖"></span>Subdomain Enum</a></figure><p id="1f8f2649-577b-800d-8e87-d8b1f57aab47" class="" dir="auto">
+</p><details id="1b7f2649-577b-807c-857e-d47dc35d1fbf" open="" class="block-color-teal toggle" data-notion-highlight="teal" dir="auto"><summary>Labs</summary><div class="indented"><details id="1f8f2649-577b-8084-af0c-eeb3d883fbed" open="" class="toggle" dir="auto"><summary><strong>Port Scanning and Enumeration with Armitage</strong></summary><div class="indented"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="1f8f2649-577b-80a0-af3e-fd0789948e62" class="code code-wrap"><code style="white-space:pre-wrap;word-break:break-all">service postgresql start
+service postgresql status
+armitage</code></pre></div></details><p id="1f8f2649-577b-8018-b51e-e669370a3b01" class="" dir="auto"><strong>Port Scanning &amp; Enumeration - Windows</strong></p><p id="1f8f2649-577b-8061-a841-fb647ff8c27b" class="" dir="auto"><strong>Port Scanning and Enumeration - Linux</strong></p></div></details><p id="1b7f2649-577b-8000-9efa-de74955a3da1" class="" dir="auto">
+</p><hr id="1b7f2649-577b-8031-a211-f1e21c3690da" dir="auto"/><h3 id="3bd1c6e6-751c-477d-9648-923070194aee" class="block-color-red_background" data-notion-highlight="red_background" dir="auto">TCP scanning</h3><p id="d88ec66c-1292-4ad2-a306-65234d61252d" class="" dir="auto">TCP scanning is a technique used to determine the status of TCP ports on a target system. This process helps in identifying open, closed, or filtered ports, which can provide valuable information about the services running on the target. Here’s a detailed explanation of the TCP scan process:</p><h3 id="b34ea7e3-cf5f-40db-9998-907a97ff8dc0" class="" dir="auto"><strong>1. Understanding TCP Handshake</strong></h3><p id="78ab021b-5d82-48cb-886c-edecf198cf18" class="" dir="auto">Before diving into TCP scanning, it’s important to understand the TCP handshake, which is the foundation of how TCP connections are established:</p><ul id="4e3fd24c-dea0-4342-85a2-1a3276efb2a3" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>SYN</strong>: The client sends a SYN (synchronize) packet to the server to initiate a connection.</li></ul><ul id="c161783e-982e-4604-bcc1-e3838b2d75e2" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>SYN-ACK</strong>: The server responds with a SYN-ACK (synchronize-acknowledge) packet if the port is open and it’s willing to establish a connection.</li></ul><ul id="2ea8b6c1-b097-46b3-bf3f-b1e5b4a05714" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>ACK</strong>: The client sends an ACK (acknowledge) packet to establish the connection fully.</li></ul><h3 id="3a4aafc2-3ed3-4750-a493-a3b8485c5f96" class="" dir="auto"><strong>2. Types of TCP Scans</strong></h3><p id="ee0b03f2-943c-4f89-9cd4-700958be716f" class="" dir="auto">There are several types of TCP scans, each with its unique approach and purpose:</p><ul id="058ad1fc-cbec-47a4-bfbb-8c596276ccaa" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>SYN Scan (Half-Open Scan)</strong></li></ul><ul id="35f0f5ee-b120-4130-99c1-85b54a6346c4" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Connect Scan</strong></li></ul><ul id="ee31678b-d8fe-4b85-a4a8-587008bff0dc" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>ACK Scan</strong></li></ul><ul id="c22d2677-7315-40af-8f9f-d81bd2c5e99f" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>FIN Scan</strong></li></ul><ul id="3a3beb30-a261-412e-a504-a8be20ffd5ed" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Xmas Scan</strong></li></ul><ul id="3621ecc8-ff47-463b-82ac-c7da30c46fcb" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Null Scan</strong></li></ul><h3 id="5b6a4742-8101-42bc-8594-4a50baa45172" class="" dir="auto"><strong>3. Detailed Steps for Common TCP Scans</strong></h3><h3 id="2bb7c4e7-258e-4e73-9998-1fdbb7b87519" class="" dir="auto"><strong>SYN Scan (Half-Open Scan)</strong></h3><p id="2ef433da-e0a7-463b-9702-c80d0b6a8031" class="" dir="auto"><strong>Step-by-Step Process:</strong></p><ol type="1" id="6a9fdfb7-377a-4b1d-9d55-00ef97b23c60" class="numbered-list" start="1" dir="auto"><li><strong>Send SYN Packet</strong>: The scanner sends a SYN packet to the target port.</li></ol><ol type="1" id="cf35edcb-68a2-4d1f-a017-ef80f81d71e9" class="numbered-list" start="2" dir="auto"><li><strong>Receive Response</strong>:<ul id="013e231d-a37e-483e-a439-b27581c7a721" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>SYN-ACK</strong>: If the port is open, the target responds with a SYN-ACK packet.</li></ul><ul id="252fdfb5-8116-4537-8a6d-ed35d22e2a4f" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>RST</strong>: If the port is closed, the target responds with an RST (reset) packet.</li></ul></li></ol><ol type="1" id="260a2bc9-6635-4ec3-8972-5eb7abf9475d" class="numbered-list" start="3" dir="auto"><li><strong>Send RST Packet</strong>: After receiving a SYN-ACK, the scanner immediately sends an RST packet to tear down the connection before it&#x27;s fully established. This is why it’s called a half-open scan.</li></ol><ol type="1" id="b22a8515-b448-4981-b914-4b4e2d2ca248" class="numbered-list" start="4" dir="auto"><li><strong>Interpret Results</strong>: Based on the responses, the scanner determines the status of the port:<ul id="d47ca3a1-3c9c-4f59-a3e5-8db35496f370" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Open</strong>: SYN-ACK received.</li></ul><ul id="6854fd2e-9bf5-4876-a2a6-edcfae227732" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Closed</strong>: RST received.</li></ul><ul id="ed6bb7be-cff2-4a6b-9b65-17a2dbaf99a9" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Filtered</strong>: No response or an ICMP unreachable message received.</li></ul></li></ol><h3 id="4a315415-8a81-4ddf-a882-a2c5212cd697" class="" dir="auto"><strong>Connect Scan</strong></h3><p id="50d8aa79-68e2-4c01-9029-689ac46d3a33" class="" dir="auto"><strong>Step-by-Step Process:</strong></p><ol type="1" id="9792534a-a7f0-4d0c-88fe-0299884f6b89" class="numbered-list" start="1" dir="auto"><li><strong>Send SYN Packet</strong>: The scanner sends a SYN packet to the target port.</li></ol><ol type="1" id="56e7397a-e80a-4a59-974b-36ce915a8dec" class="numbered-list" start="2" dir="auto"><li><strong>Receive SYN-ACK</strong>: If the port is open, the target responds with a SYN-ACK packet.</li></ol><ol type="1" id="2fac8670-0008-42d2-af08-dfc62aef2f42" class="numbered-list" start="3" dir="auto"><li><strong>Send ACK Packet</strong>: The scanner sends an ACK packet, completing the TCP handshake.</li></ol><ol type="1" id="b07ebbfd-ca39-4ad8-aa5d-15bf528ceff0" class="numbered-list" start="4" dir="auto"><li><strong>Terminate Connection</strong>: The scanner sends an RST packet to close the connection.</li></ol><ol type="1" id="f183c2a2-a84a-4723-9c6f-1d56c034feb5" class="numbered-list" start="5" dir="auto"><li><strong>Interpret Results</strong>: Based on the responses, the scanner determines the status of the port:<ul id="d479314e-cea9-4ac6-a67e-09af5a46ab54" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Open</strong>: Full TCP handshake completed.</li></ul><ul id="e8c43374-9c74-43e0-bbf5-47430a099b49" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Closed</strong>: RST received.</li></ul><ul id="90a03cdf-f619-457e-89b3-c5bd60b314ce" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Filtered</strong>: No response or an ICMP unreachable message received.</li></ul></li></ol><h3 id="fbd20906-9b28-49ee-953f-679eb2d53228" class="" dir="auto"><strong>ACK Scan</strong></h3><p id="f95f5ce9-89ab-4471-9eec-1778e82e90e2" class="" dir="auto"><strong>Step-by-Step Process:</strong></p><ol type="1" id="6241c469-355c-4d30-933a-2d78ebcf07c6" class="numbered-list" start="1" dir="auto"><li><strong>Send ACK Packet</strong>: The scanner sends an ACK packet to the target port.</li></ol><ol type="1" id="ed27141c-1532-4a1a-9e1c-19d69f4f3fcc" class="numbered-list" start="2" dir="auto"><li><strong>Receive Response</strong>:<ul id="fba9d5e7-414c-4fc5-b393-c4983b36dafa" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>RST</strong>: If the port is unfiltered, the target responds with an RST packet.</li></ul><ul id="7e7f42d2-768d-404c-b8c0-320e89771aa6" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>No Response or ICMP Error</strong>: If the port is filtered, the target either does not respond or sends an ICMP unreachable message.</li></ul></li></ol><ol type="1" id="9b566f3b-d040-4c59-8ad9-54781c3c3bd1" class="numbered-list" start="3" dir="auto"><li><strong>Interpret Results</strong>: Based on the responses, the scanner determines the status of the port:<ul id="442591e3-c81e-452c-93b3-d2f9af8e70ce" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Unfiltered</strong>: RST received.</li></ul><ul id="06764a91-545d-4e60-92fa-8a73a3ea3167" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Filtered</strong>: No response or an ICMP unreachable message received.</li></ul></li></ol><h3 id="5e446c24-deb0-4345-960b-4aa387a119d5" class="" dir="auto"><strong>FIN, Xmas, and Null Scans</strong></h3><p id="8f4565cf-bbff-4d35-bac2-f659ffa93003" class="" dir="auto">These scans are designed to evade simple stateless firewall and packet filtering rules. They work on the principle that closed ports must reply with an RST packet, while open ports should ignore the packets.</p><p id="4a2fac8c-3542-41df-9ed0-d8e617d9a645" class="" dir="auto"><strong>Step-by-Step Process:</strong></p><ol type="1" id="4da2d9df-826c-4ace-801a-d7fdfa524731" class="numbered-list" start="1" dir="auto"><li><strong>Send FIN/Xmas/Null Packet</strong>: The scanner sends a FIN, Xmas (which sets the FIN, PSH, and URG flags), or Null packet (with no flags set) to the target port.</li></ol><ol type="1" id="5cfc6b3b-6d1f-4cf0-b642-5df441446757" class="numbered-list" start="2" dir="auto"><li><strong>Receive Response</strong>:<ul id="ccc91efd-378a-487f-b7a0-83d1859ecb6c" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>RST</strong>: If the port is closed, the target responds with an RST packet.</li></ul><ul id="715bd8ba-dd63-41a7-a0e0-13f3cb6a5cf7" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>No Response</strong>: If the port is open, the target ignores the packet.</li></ul></li></ol><ol type="1" id="345c71e7-0cb0-48fc-a687-1198f091deb8" class="numbered-list" start="3" dir="auto"><li><strong>Interpret Results</strong>: Based on the responses, the scanner determines the status of the port:<ul id="7bb11465-2d7d-4459-8e4a-f793f55eab16" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Open</strong>: No response.</li></ul><ul id="8b925bf7-f4c7-49ea-873f-68d51893c811" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Closed</strong>: RST received.</li></ul><ul id="11d72584-33ec-4b4f-b451-c4d830383bd9" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Filtered</strong>: No response or an ICMP unreachable message received.</li></ul></li></ol><h3 id="64ceba98-73bb-4e99-b61c-1b3ebb710641" class="" dir="auto"><strong>4. Tools for TCP Scanning</strong></h3><p id="23ab468b-50bd-4921-976f-77494286c1bc" class="" dir="auto">Common tools used for TCP scanning include:</p><ul id="e3a4103a-378f-4663-9f8a-bf6fd10fbf0a" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Nmap</strong>: Widely used for various types of network scanning.</li></ul><ul id="bd678b43-3e84-4e8e-9f1e-f7323f3206a1" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Zenmap</strong>: The graphical interface for Nmap.</li></ul><ul id="c60a03d8-0022-4447-999b-bfe3f0281a37" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Masscan</strong>: Known for its speed in scanning large networks.</li></ul><h3 id="79488e73-ead5-4891-85f3-05a79c131e9d" class="" dir="auto"><strong>5. Ethical Considerations</strong></h3><ul id="72678d71-762a-4efe-be26-8bbd997f8a9b" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Always obtain proper authorization before performing any scans.</li></ul><ul id="0576ff0a-669f-4a87-b740-906aaca3b2a2" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Be aware of the legal implications and potential consequences of scanning without permission.</li></ul><ul id="d90f8087-9daa-4e42-bee0-155efb0e26c2" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Follow best practices and ethical guidelines to ensure responsible use of scanning techniques.</li></ul><h3 id="64e4dff1-4d3b-46d1-b56b-121119dfca59" class="" dir="auto"><strong>Example of Performing a SYN Scan with Nmap</strong></h3><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha512-whYhDwtTmlC/NpZlCr6PSsAaLOrfjVg/iXAnC4H/dtiHawpShhT2SlIMbpIhT/IL/NrpdMm+Hq2C13+VKpHTYw==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><pre id="10fe2590-dbd6-488e-9a6d-938e1d45a0f1" class="code code-wrap" data-notion-code-syntax="bash"><code class="language-bash" style="white-space:pre-wrap;word-break:break-all">nmap -sS &lt;target IP&gt;</code></pre><p id="76fd09a0-ebe2-41a5-b41a-1e81ee10a946" class="" dir="auto">This command performs a SYN scan (<code><strong>-sS</strong></code>) on the specified target IP address.</p><h3 id="e989fa6f-4eb2-4029-a501-57483caaae50" class="" dir="auto"><strong>Example of Performing a Connect Scan with Nmap</strong></h3><pre id="05dc637e-767f-4fa3-b0af-e1eb81df0152" class="code code-wrap" data-notion-code-syntax="bash"><code class="language-bash" style="white-space:pre-wrap;word-break:break-all">nmap -sT &lt;target IP&gt;</code></pre><p id="f8f3c84b-baa8-477b-afda-6977eaf7eb5a" class="" dir="auto">This command performs a connect scan (<code><strong>-sT</strong></code>) on the specified target IP address.</p><p id="2896c160-c537-4dda-a945-d9daad6504fa" class="" dir="auto">By understanding and correctly implementing these TCP scanning techniques, cybersecurity professionals can effectively assess network security and identify potential vulnerabilities.</p><p id="2c3315f2-796c-4f85-8b42-cfd806c4de99" class="" dir="auto">
+</p><h3 id="10535039-3bc7-4439-9769-4ffdb4dfb226" class="block-color-red_background" data-notion-highlight="red_background" dir="auto">NMAP cheat sheet</h3><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js" integrity="sha512-m3JYEI6gx5fh9jF10FjGoMzVKcV2N6nchcDcqPCdI1L3R2WQV7br2XVNR8iTLb2daOMRl3zldbcfT40xU2ntVw==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><pre id="760b4ace-d232-4e44-bade-5cf3345357d2" class="code code-wrap" data-notion-code-syntax="jsx"><code class="language-jsx" style="white-space:pre-wrap;word-break:break-all">https://www.stationx.net/nmap-cheat-sheet/</code></pre><pre id="d28f4a68-3523-43ba-b885-6b6b20d3d3c7" class="code code-wrap" data-notion-code-syntax="jsx"><code class="language-jsx" style="white-space:pre-wrap;word-break:break-all">https://www.stationx.net/nmap-udp-scan/</code></pre><p id="d6cbc8df-6380-4234-b563-1a589a70e16d" class="" dir="auto"><div class="indented"><figure id="1b3f2649-577b-8000-8165-ffb87b1fdcd4" dir="ltr"><a href="https://www.stationx.net/common-ports-cheat-sheet/" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">Common Ports Cheat Sheet: The Ultimate Ports &amp; Protocols List</div><div class="bookmark-description">Use this comprehensive common ports cheat sheet to learn about any port and several common protocols. It also includes a special search and copy function.</div></div><div class="bookmark-href"><img src="https://www.stationx.net/favicon.ico" class="icon bookmark-icon"/>https://www.stationx.net/common-ports-cheat-sheet/</div></div><img src="https://www.stationx.net/wp-content/uploads/2022/12/Og-Common-Ports-Cheat-Sheet.jpg" class="bookmark-image"/></a></figure></div></p><p id="1b3f2649-577b-80e2-939a-f9ea7ab1a2a1" class="" dir="auto">
+</p><p id="1b3f2649-577b-8004-867f-e88cfc112e7d" class="" dir="auto">
+</p><h3 id="9d7295ea-ec6c-4797-9853-9295cfd216c4" class="" dir="auto">Netdiscover</h3><pre id="0ace7b20-92fa-4e1c-b7c6-b7ec1dc159a7" class="code code-wrap" data-notion-code-syntax="jsx"><code class="language-jsx" style="white-space:pre-wrap;word-break:break-all">netdiscover -i eth0 -r 192.168.96.128/24</code></pre><p id="2c0f2649-577b-80a5-94b2-f44590d7ab8f" class="" dir="auto">
+</p></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>
