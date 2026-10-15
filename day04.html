@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Networks, Protocols &amp; Security</title>
+<style>
+  :root{
+    --bg:#0b0f1a; --bg2:#0f1524; --panel:#141b2d; --panel2:#1a2237; --border:#28324e;
+    --text:#e8edf9; --muted:#98a4c4; --dim:#6c7899;
+    --accent:#5b9dff; --accent2:#38d39f; --purple:#a888ff; --amber:#f2b757; --pink:#ff7ab6;
+    --warn:#ff7a7a; --ok:#38d39f;
+    --code:#080c15; --chip:#20304f;
+    --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg); color:var(--text); font-family:var(--sans); line-height:1.6; overflow-x:hidden}
+  ::selection{background:rgba(91,157,255,.3)}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    padding:64px 20px 40px; text-align:center; position:relative; overflow:hidden;
+    background:radial-gradient(1000px 460px at 50% -60%, rgba(91,157,255,.22), transparent 70%);
+    border-bottom:1px solid var(--border);
+  }
+  .hero .grid-bg{
+    position:absolute; inset:0; opacity:.35; pointer-events:none;
+    background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);
+    background-size:44px 44px; mask-image:radial-gradient(700px 340px at 50% 0%,#000,transparent 75%);
+  }
+  .hero h1{font-size:2.6rem; font-weight:800; letter-spacing:-1px; position:relative;
+    background:linear-gradient(120deg,#fff 20%,#89b8ff 60%,#7ee0c0);
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;}
+  .hero p{color:var(--muted); max-width:600px; margin:12px auto 0; position:relative}
+  .hero .badges{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:22px; position:relative}
+  .hero .badges span{font-size:.78rem; padding:5px 14px; border:1px solid var(--border); border-radius:999px;
+    background:rgba(20,27,45,.6); color:var(--muted); backdrop-filter:blur(6px)}
+
+  /* ---------- Tabs ---------- */
+  .tabs{position:sticky; top:0; z-index:50; display:flex; gap:4px; justify-content:center;
+    padding:12px; background:rgba(11,15,26,.9); backdrop-filter:blur(12px); border-bottom:1px solid var(--border); flex-wrap:wrap}
+  .tab{background:none; border:1px solid transparent; color:var(--muted); font-family:var(--sans); font-size:.92rem;
+    font-weight:600; padding:9px 18px; border-radius:10px; cursor:pointer; transition:.18s; display:flex; align-items:center; gap:8px}
+  .tab:hover{color:var(--text); background:var(--panel)}
+  .tab.active{color:#fff; background:linear-gradient(120deg,rgba(91,157,255,.25),rgba(56,211,159,.18)); border-color:var(--accent)}
+  .tab .ic{width:16px; height:16px; display:inline-block}
+
+  .wrap{max-width:1000px; margin:0 auto; padding:32px 20px 60px}
+  .panel-view{display:none; animation:fade .4s ease}
+  .panel-view.active{display:block}
+  @keyframes fade{from{opacity:0; transform:translateY(12px)}to{opacity:1; transform:none}}
+
+  h2.sec{font-size:1.7rem; font-weight:800; letter-spacing:-.5px; margin-bottom:6px; display:flex; align-items:center; gap:12px}
+  h2.sec .bar{width:5px; height:26px; border-radius:3px; background:linear-gradient(var(--accent),var(--accent2))}
+  .sub{color:var(--muted); margin-bottom:26px; max-width:680px}
+  h3{font-size:1.15rem; font-weight:700; margin:34px 0 12px}
+
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:20px 22px}
+
+  /* ---------- Network scale explorer ---------- */
+  .scale-row{display:flex; gap:10px; margin:8px 0 26px; flex-wrap:wrap}
+  .scale-btn{flex:1; min-width:90px; background:var(--panel); border:1px solid var(--border); border-radius:12px;
+    padding:14px 10px; cursor:pointer; text-align:center; transition:.2s; position:relative; overflow:hidden}
+  .scale-btn:hover{transform:translateY(-3px); border-color:var(--accent)}
+  .scale-btn.active{border-color:var(--accent); background:linear-gradient(160deg,var(--panel2),rgba(91,157,255,.12))}
+  .scale-btn .abbr{font-size:1.3rem; font-weight:800; font-family:var(--mono); color:var(--accent)}
+  .scale-btn .rng{font-size:.68rem; color:var(--dim); margin-top:2px}
+  .scale-detail{min-height:150px}
+  .scale-detail .head{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap}
+  .scale-detail .head h4{font-size:1.3rem; font-weight:800}
+  .scale-detail .head .rng{font-family:var(--mono); font-size:.85rem; color:var(--accent2); background:var(--chip); padding:3px 10px; border-radius:8px}
+  .scale-detail p{color:var(--muted); margin:12px 0}
+  .scale-detail .ex{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px}
+  .scale-detail .ex span{font-size:.8rem; padding:4px 11px; border:1px solid var(--border); border-radius:8px; color:var(--muted); background:var(--bg2)}
+
+  /* ---------- Topology diagrams ---------- */
+  .topo-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; margin-top:14px}
+  .topo{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:16px; text-align:center; cursor:pointer; transition:.2s}
+  .topo:hover{border-color:var(--purple); background:var(--panel2)}
+  .topo svg{width:100%; height:110px}
+  .topo .name{font-weight:700; margin-top:6px}
+  .topo .desc{font-size:.78rem; color:var(--dim); margin-top:4px}
+  .topo .node{fill:var(--accent)}
+  .topo .link{stroke:var(--dim); stroke-width:1.6; fill:none}
+  .topo:hover .node{fill:var(--purple)}
+  .topo:hover .link{stroke:var(--purple)}
+
+  /* ---------- OSI stack ---------- */
+  .stack-wrap{display:grid; grid-template-columns:1fr 1fr; gap:20px}
+  @media(max-width:760px){.stack-wrap{grid-template-columns:1fr}}
+  .toggle-model{display:flex; gap:6px; margin-bottom:14px}
+  .toggle-model button{flex:1; background:var(--panel); border:1px solid var(--border); color:var(--muted);
+    padding:8px; border-radius:10px; cursor:pointer; font-weight:600; font-family:var(--sans); transition:.18s}
+  .toggle-model button.active{background:var(--accent); border-color:var(--accent); color:#031024}
+  .layer{display:flex; align-items:center; gap:12px; padding:12px 15px; border:1px solid var(--border);
+    border-radius:11px; margin-bottom:7px; cursor:pointer; transition:.18s; background:var(--panel); position:relative}
+  .layer:hover{transform:translateX(4px)}
+  .layer.active{border-color:var(--lc); background:linear-gradient(90deg,color-mix(in srgb,var(--lc) 18%,var(--panel)),var(--panel))}
+  .layer .n{width:26px; height:26px; flex:none; border-radius:7px; background:var(--lc); color:#04101f; font-weight:800;
+    display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:.85rem}
+  .layer .lname{font-weight:700}
+  .layer .lpdu{margin-left:auto; font-size:.7rem; font-family:var(--mono); color:var(--dim); border:1px solid var(--border); padding:2px 7px; border-radius:6px}
+  .layer-info{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:20px; position:sticky; top:80px; min-height:280px}
+  .layer-info .tagline{font-size:.75rem; text-transform:uppercase; letter-spacing:1px; color:var(--accent); font-weight:700}
+  .layer-info h4{font-size:1.4rem; font-weight:800; margin:4px 0 10px}
+  .layer-info p{color:var(--muted); font-size:.92rem}
+  .layer-info .protos{display:flex; gap:7px; flex-wrap:wrap; margin-top:14px}
+  .layer-info .protos span{font-size:.78rem; font-family:var(--mono); padding:4px 10px; border-radius:7px;
+    background:var(--chip); border:1px solid var(--border); color:#cfe0ff}
+  .layer-info .attackline{margin-top:16px; font-size:.85rem; padding:10px 12px; border-radius:9px;
+    background:rgba(255,122,122,.08); border:1px solid rgba(255,122,122,.3); color:#ffbcbc}
+
+  /* ---------- Protocol reference ---------- */
+  .search-bar{display:flex; gap:10px; margin:8px 0 14px; flex-wrap:wrap; align-items:center}
+  .search-bar input{flex:1; min-width:180px; background:var(--panel); border:1px solid var(--border); border-radius:10px;
+    padding:11px 15px; color:var(--text); font-size:.92rem; font-family:var(--sans); outline:none}
+  .search-bar input:focus{border-color:var(--accent)}
+  .filter-chips{display:flex; gap:6px; flex-wrap:wrap}
+  .fchip{font-size:.78rem; padding:6px 13px; border:1px solid var(--border); border-radius:999px; background:var(--panel);
+    color:var(--muted); cursor:pointer; transition:.15s}
+  .fchip:hover{color:var(--text)}
+  .fchip.active{background:var(--accent); border-color:var(--accent); color:#04101f; font-weight:600}
+  table{width:100%; border-collapse:collapse; font-size:.9rem}
+  th,td{text-align:left; padding:11px 12px; border-bottom:1px solid var(--border)}
+  th{color:var(--accent); font-size:.72rem; text-transform:uppercase; letter-spacing:.6px; position:sticky}
+  tbody tr{transition:.12s}
+  tbody tr:hover{background:var(--panel2)}
+  td .pname{font-family:var(--mono); font-weight:700; color:#cfe0ff}
+  td .port{font-family:var(--mono); font-size:.82rem}
+  .lp{display:inline-block; font-size:.68rem; font-family:var(--mono); padding:2px 8px; border-radius:6px; border:1px solid var(--border)}
+  .lp.app{color:#a888ff; background:rgba(168,136,255,.1)}
+  .lp.tra{color:#38d39f; background:rgba(56,211,159,.1)}
+  .lp.net{color:#5b9dff; background:rgba(91,157,255,.1)}
+  .lp.lnk{color:#f2b757; background:rgba(242,183,87,.1)}
+  .secdot{width:9px; height:9px; border-radius:50%; display:inline-block; margin-right:6px}
+  .no-res{text-align:center; color:var(--dim); padding:26px}
+
+  /* ---------- Security matrix ---------- */
+  .threat-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px; margin-top:8px}
+  .threat{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:0; overflow:hidden; cursor:pointer; transition:.2s}
+  .threat:hover{border-color:var(--warn); transform:translateY(-2px)}
+  .threat .top{padding:14px 16px; display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--border)}
+  .threat .top .ico{width:34px; height:34px; border-radius:9px; background:rgba(255,122,122,.12); display:flex; align-items:center; justify-content:center; flex:none}
+  .threat .top h4{font-size:1rem; font-weight:700}
+  .threat .body{padding:14px 16px}
+  .threat .body p{font-size:.85rem; color:var(--muted)}
+  .threat .fix{margin-top:12px; font-size:.82rem; padding:9px 12px; border-radius:9px; background:rgba(56,211,159,.08);
+    border:1px solid rgba(56,211,159,.28); color:#8ee9cd}
+  .threat .fix b{color:var(--ok)}
+
+  .cia{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin:14px 0 26px}
+  @media(max-width:640px){.cia{grid-template-columns:1fr}}
+  .cia .c{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:18px; text-align:center; transition:.2s}
+  .cia .c:hover{transform:translateY(-3px)}
+  .cia .c .big{font-size:1.6rem; font-weight:800}
+  .cia .c.conf{border-top:3px solid var(--accent)} .cia .c.conf .big{color:var(--accent)}
+  .cia .c.integ{border-top:3px solid var(--purple)} .cia .c.integ .big{color:var(--purple)}
+  .cia .c.avail{border-top:3px solid var(--amber)} .cia .c.avail .big{color:var(--amber)}
+  .cia .c p{font-size:.82rem; color:var(--muted); margin-top:6px}
+
+  /* ---------- Quiz ---------- */
+  .quiz{background:linear-gradient(160deg,var(--panel2),var(--panel)); border:1px solid var(--border); border-radius:18px; padding:24px}
+  .q{margin-bottom:20px}
+  .q.hidden{display:none}
+  .q .qnum{font-size:.75rem; color:var(--accent); font-weight:700; font-family:var(--mono)}
+  .q .qtext{font-weight:700; font-size:1.08rem; margin:6px 0 14px}
+  .opt{display:block; width:100%; text-align:left; background:var(--panel); border:1px solid var(--border); color:var(--text);
+    padding:12px 16px; border-radius:11px; margin-bottom:9px; cursor:pointer; font-family:var(--sans); font-size:.92rem; transition:.15s}
+  .opt:hover:not(:disabled){border-color:var(--accent); background:var(--panel2)}
+  .opt.correct{border-color:var(--ok); background:rgba(56,211,159,.14); color:#aef0da}
+  .opt.wrong{border-color:var(--warn); background:rgba(255,122,122,.12); color:#ffc4c4}
+  .opt:disabled{cursor:default}
+  .qfeed{font-size:.85rem; color:var(--muted); margin-top:6px; min-height:20px}
+  .quiz-bar{height:6px; background:var(--border); border-radius:99px; overflow:hidden; margin-bottom:20px}
+  .quiz-bar i{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:.4s}
+  .quiz-nav{display:flex; justify-content:space-between; align-items:center; margin-top:10px}
+  .btn{background:var(--accent); border:none; color:#031024; font-weight:700; padding:10px 22px; border-radius:10px;
+    cursor:pointer; font-family:var(--sans); font-size:.92rem; transition:.15s}
+  .btn:hover{filter:brightness(1.1)}
+  .btn:disabled{opacity:.4; cursor:not-allowed}
+  .quiz-result{text-align:center; padding:20px}
+  .quiz-result .score{font-size:3rem; font-weight:800; background:linear-gradient(120deg,#89b8ff,#7ee0c0);
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent}
+
+  footer{text-align:center; padding:34px 20px 50px; color:var(--dim); font-size:.85rem; border-top:1px solid var(--border)}
+  .tip{font-size:.8rem; color:var(--dim); margin-top:4px}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="grid-bg"></div>
+  <h1>Networks, Protocols &amp; Security</h1>
+  <p>An interactive field guide — explore how networks are built, the protocols that run them, and how they're attacked and defended.</p>
+  <div class="badges">
+    <span>🌐 Network types</span><span>📡 OSI &amp; TCP/IP</span><span>🔌 Protocol reference</span><span>🛡️ Threats &amp; defenses</span><span>🧠 Quiz</span>
+  </div>
+</div>
+
+<div class="tabs" id="tabs">
+  <button class="tab active" data-view="types">🌐 Network Types</button>
+  <button class="tab" data-view="models">📚 Layers &amp; Models</button>
+  <button class="tab" data-view="protocols">🔌 Protocols</button>
+  <button class="tab" data-view="security">🛡️ Security</button>
+  <button class="tab" data-view="quiz">🧠 Quiz</button>
+</div>
+
+<div class="wrap">
+
+  <!-- ============ NETWORK TYPES ============ -->
+  <div class="panel-view active" id="view-types">
+    <h2 class="sec"><span class="bar"></span>Network Types by Scale</h2>
+    <p class="sub">Networks are classified by how far they reach. Click a scale to explore it.</p>
+
+    <div class="scale-row" id="scaleRow"></div>
+    <div class="card scale-detail" id="scaleDetail"></div>
+
+    <h3>Topologies — how nodes are wired</h3>
+    <p class="sub" style="margin-bottom:0">The physical or logical arrangement of devices. Each trades cost against resilience.</p>
+    <div class="topo-grid" id="topoGrid"></div>
+
+    <h3>Wired vs Wireless &amp; key hardware</h3>
+    <div class="card">
+      <table>
+        <thead><tr><th>Device</th><th>OSI Layer</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><b>Hub</b></td><td>L1 Physical</td><td>Dumb repeater — broadcasts to all ports (legacy).</td></tr>
+          <tr><td><b>Switch</b></td><td>L2 Data Link</td><td>Forwards frames by MAC address; builds a MAC table.</td></tr>
+          <tr><td><b>Router</b></td><td>L3 Network</td><td>Routes packets between networks by IP; runs routing protocols.</td></tr>
+          <tr><td><b>Firewall</b></td><td>L3–L7</td><td>Filters traffic by rules; modern ones inspect application data.</td></tr>
+          <tr><td><b>Access Point</b></td><td>L2</td><td>Bridges wireless (Wi‑Fi) clients onto the wired LAN.</td></tr>
+          <tr><td><b>Load Balancer</b></td><td>L4 / L7</td><td>Distributes connections across servers for scale &amp; uptime.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ============ MODELS ============ -->
+  <div class="panel-view" id="view-models">
+    <h2 class="sec"><span class="bar"></span>The OSI &amp; TCP/IP Models</h2>
+    <p class="sub">Layered models split networking into jobs, so each layer only talks to its neighbors. Click any layer to see what it does, its protocols, and how it's attacked.</p>
+
+    <div class="toggle-model" id="modelToggle">
+      <button class="active" data-model="osi">OSI · 7 layers</button>
+      <button data-model="tcp">TCP/IP · 4 layers</button>
+    </div>
+
+    <div class="stack-wrap">
+      <div id="stackCol"></div>
+      <div class="layer-info" id="layerInfo"></div>
+    </div>
+
+    <div class="card" style="margin-top:24px">
+      <h3 style="margin-top:0">📦 Encapsulation — the mailroom analogy</h3>
+      <p class="sub" style="margin-bottom:0">As data goes <b>down</b> the stack on the sender, each layer wraps it in its own header (like nesting envelopes): data → <b>segment</b> (L4) → <b>packet</b> (L3) → <b>frame</b> (L2) → <b>bits</b> (L1). The receiver unwraps them in reverse. That's why a layer only needs to understand its own header.</p>
+    </div>
+  </div>
+
+  <!-- ============ PROTOCOLS ============ -->
+  <div class="panel-view" id="view-protocols">
+    <h2 class="sec"><span class="bar"></span>Protocol Reference</h2>
+    <p class="sub">Search by name or filter by layer. Green = encrypted/secure by design, red = cleartext.</p>
+
+    <div class="search-bar">
+      <input type="text" id="protoSearch" placeholder="🔍 Search protocols… (e.g. https, dns, tls)">
+    </div>
+    <div class="filter-chips" id="protoFilters">
+      <span class="fchip active" data-l="all">All</span>
+      <span class="fchip" data-l="app">Application</span>
+      <span class="fchip" data-l="tra">Transport</span>
+      <span class="fchip" data-l="net">Network</span>
+      <span class="fchip" data-l="lnk">Link</span>
+    </div>
+    <div class="card" style="padding:0; overflow:hidden; margin-top:14px">
+      <table>
+        <thead><tr><th>Protocol</th><th>Layer</th><th>Port</th><th>Transport</th><th>Purpose</th></tr></thead>
+        <tbody id="protoBody"></tbody>
+      </table>
+      <div class="no-res" id="noRes" style="display:none">No protocols match your search.</div>
+    </div>
+    <p class="tip">Tip: a red security dot means credentials/data travel in plaintext — always prefer the encrypted variant on the right of the pair (HTTP→HTTPS, FTP→SFTP, Telnet→SSH).</p>
+  </div>
+
+  <!-- ============ SECURITY ============ -->
+  <div class="panel-view" id="view-security">
+    <h2 class="sec"><span class="bar"></span>Network Security</h2>
+    <p class="sub">Every defense maps back to three goals — the CIA triad. Click a threat card to see the fix.</p>
+
+    <div class="cia">
+      <div class="c conf"><div class="big">C</div><div style="font-weight:700">Confidentiality</div><p>Only authorized parties can read the data. Broken by sniffing &amp; MITM. Fixed by encryption.</p></div>
+      <div class="c integ"><div class="big">I</div><div style="font-weight:700">Integrity</div><p>Data isn't altered in transit. Broken by tampering &amp; spoofing. Fixed by hashing &amp; signatures.</p></div>
+      <div class="c avail"><div class="big">A</div><div style="font-weight:700">Availability</div><p>Service stays reachable. Broken by DoS/DDoS. Fixed by rate-limiting &amp; redundancy.</p></div>
+    </div>
+
+    <h3>Common attacks &amp; how to stop them</h3>
+    <div class="threat-grid" id="threatGrid"></div>
+
+    <h3>The defender's toolkit</h3>
+    <div class="card">
+      <table>
+        <thead><tr><th>Control</th><th>Protects</th><th>How</th></tr></thead>
+        <tbody>
+          <tr><td><b>Firewall</b></td><td>Availability, Confidentiality</td><td>Allow/deny traffic by rules; segment zones (DMZ).</td></tr>
+          <tr><td><b>VPN</b></td><td>Confidentiality, Integrity</td><td>Encrypted tunnel (IPsec / WireGuard / TLS) over untrusted networks.</td></tr>
+          <tr><td><b>TLS / SSL</b></td><td>Confidentiality, Integrity</td><td>Encrypts app traffic; authenticates servers via certificates.</td></tr>
+          <tr><td><b>IDS / IPS</b></td><td>All three</td><td>Detects (IDS) or blocks (IPS) malicious patterns in traffic.</td></tr>
+          <tr><td><b>Network segmentation / VLANs</b></td><td>Confidentiality</td><td>Limits lateral movement; contains a breach to one segment.</td></tr>
+          <tr><td><b>802.1X / NAC</b></td><td>Confidentiality</td><td>Authenticates devices before granting network access.</td></tr>
+          <tr><td><b>Zero Trust</b></td><td>All three</td><td>"Never trust, always verify" — authenticate every request, no implicit perimeter trust.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card" style="margin-top:16px; border-left:3px solid var(--accent)">
+      <h3 style="margin-top:0">🔐 Defense in depth</h3>
+      <p class="sub" style="margin-bottom:0">No single control is enough. Layer them — perimeter firewall, segmented internal zones, encrypted transport, endpoint protection, monitoring, and least-privilege access — so an attacker who beats one control still faces the next.</p>
+    </div>
+  </div>
+
+  <!-- ============ QUIZ ============ -->
+  <div class="panel-view" id="view-quiz">
+    <h2 class="sec"><span class="bar"></span>Test Yourself</h2>
+    <p class="sub">Six questions across everything above. Instant feedback, no sign-in.</p>
+    <div class="quiz">
+      <div class="quiz-bar"><i id="quizProg"></i></div>
+      <div id="quizBody"></div>
+      <div class="quiz-nav">
+        <span class="tip" id="quizCount"></span>
+        <button class="btn" id="quizNext" disabled>Next →</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  Interactive learning module · Networks · Protocols · Security &nbsp;·&nbsp; built for study &amp; teaching
+</footer>
+
+<script>
+/* ---------------- DATA ---------------- */
+const SCALES = [
+  {abbr:"PAN", rng:"~10 m", name:"Personal Area Network", desc:"Connects your personal devices around a single person. Usually wireless and short-range.", ex:["Bluetooth earbuds","Smartwatch↔phone","Wireless mouse","NFC tap"]},
+  {abbr:"LAN", rng:"1 building", name:"Local Area Network", desc:"Devices in one home, office, or campus building sharing a switch/router. Fast, cheap, privately owned.", ex:["Office Ethernet","Home Wi-Fi","School computer lab"]},
+  {abbr:"CAN", rng:"campus", name:"Campus Area Network", desc:"Several nearby LANs linked across a campus or corporate site, owned by one organization.", ex:["University campus","Hospital complex","Corporate HQ"]},
+  {abbr:"MAN", rng:"a city", name:"Metropolitan Area Network", desc:"Spans a city or large town, often run by an ISP or municipality to link multiple sites.", ex:["City-wide fiber","Cable TV network","Municipal Wi-Fi"]},
+  {abbr:"WAN", rng:"country+", name:"Wide Area Network", desc:"Connects networks across regions, countries, or continents — usually over leased or public links.", ex:["Corporate WAN","MPLS links","The Internet (biggest WAN)"]},
+  {abbr:"VPN", rng:"virtual", name:"Virtual Private Network", desc:"An encrypted logical network laid over a public one, making remote devices behave as if on the same private LAN.", ex:["Remote work tunnel","Site-to-site IPsec","WireGuard mesh"]},
+];
+
+const TOPOS = {
+  Star:{svg:`<circle class="node" cx="60" cy="55" r="7"/><circle class="node" cx="60" cy="18" r="5"/><circle class="node" cx="102" cy="45" r="5"/><circle class="node" cx="90" cy="90" r="5"/><circle class="node" cx="30" cy="90" r="5"/><circle class="node" cx="18" cy="45" r="5"/><path class="link" d="M60 55 L60 18 M60 55 L102 45 M60 55 L90 90 M60 55 L30 90 M60 55 L18 45"/>`, d:"All nodes to one hub. Easy to manage; hub is a single point of failure."},
+  Bus:{svg:`<path class="link" d="M12 55 H108"/><circle class="node" cx="24" cy="55" r="5"/><circle class="node" cx="48" cy="55" r="5"/><circle class="node" cx="72" cy="55" r="5"/><circle class="node" cx="96" cy="55" r="5"/><path class="link" d="M24 55 V38 M48 55 V38 M72 55 V72 M96 55 V72"/>`, d:"One shared backbone cable. Cheap; a break kills everything."},
+  Ring:{svg:`<path class="link" d="M60 20 A35 35 0 1 1 59 20"/><circle class="node" cx="60" cy="20" r="5"/><circle class="node" cx="95" cy="55" r="5"/><circle class="node" cx="60" cy="90" r="5"/><circle class="node" cx="25" cy="55" r="5"/>`, d:"Each node links to two others in a loop. Predictable; one break can split it."},
+  Mesh:{svg:`<circle class="node" cx="35" cy="30" r="5"/><circle class="node" cx="85" cy="30" r="5"/><circle class="node" cx="35" cy="80" r="5"/><circle class="node" cx="85" cy="80" r="5"/><circle class="node" cx="60" cy="55" r="5"/><path class="link" d="M35 30 L85 30 L85 80 L35 80 Z M35 30 L85 80 M85 30 L35 80 M35 30 L60 55 M85 30 L60 55 M35 80 L60 55 M85 80 L60 55"/>`, d:"Everything connects to everything. Ultra-resilient; expensive to cable."},
+  Tree:{svg:`<circle class="node" cx="60" cy="18" r="6"/><circle class="node" cx="32" cy="55" r="5"/><circle class="node" cx="88" cy="55" r="5"/><circle class="node" cx="18" cy="92" r="4"/><circle class="node" cx="46" cy="92" r="4"/><circle class="node" cx="74" cy="92" r="4"/><circle class="node" cx="102" cy="92" r="4"/><path class="link" d="M60 18 L32 55 M60 18 L88 55 M32 55 L18 92 M32 55 L46 92 M88 55 L74 92 M88 55 L102 92"/>`, d:"Hierarchy of stars. Scales well; upper nodes are critical."},
+};
+
+const OSI = [
+  {n:7, name:"Application", c:"#a888ff", pdu:"Data", tag:"What the user touches", desc:"Where apps meet the network — browsers, mail clients, APIs. Provides services directly to software.", protos:["HTTP/S","DNS","SMTP","FTP","SSH"], attack:"Phishing, injection, app-layer DDoS, malware"},
+  {n:6, name:"Presentation", c:"#c78bff", pdu:"Data", tag:"Translation & encryption", desc:"Formats, encrypts, and compresses data so the two ends agree on representation (character sets, TLS lives here).", protos:["TLS/SSL","JPEG","ASCII","MIME"], attack:"SSL stripping, weak-cipher downgrade"},
+  {n:5, name:"Session", c:"#8b9bff", pdu:"Data", tag:"Conversations", desc:"Opens, manages, and closes sessions between applications; handles dialogue control and checkpoints.", protos:["NetBIOS","RPC","PPTP"], attack:"Session hijacking, replay"},
+  {n:4, name:"Transport", c:"#38d39f", pdu:"Segment", tag:"Reliable delivery", desc:"End-to-end delivery. TCP gives ordered, reliable streams; UDP gives fast, connectionless datagrams. Ports live here.", protos:["TCP","UDP","QUIC"], attack:"SYN flood, port scanning"},
+  {n:3, name:"Network", c:"#5b9dff", pdu:"Packet", tag:"Routing across networks", desc:"Logical addressing (IP) and routing packets between different networks, hop by hop.", protos:["IP","ICMP","OSPF","BGP"], attack:"IP spoofing, route hijack, ICMP floods"},
+  {n:2, name:"Data Link", c:"#4fb8e6", pdu:"Frame", tag:"Local delivery", desc:"Moves frames between adjacent nodes on the same link using MAC addresses; switches operate here.", protos:["Ethernet","Wi-Fi","ARP","PPP"], attack:"ARP spoofing, MAC flooding, VLAN hopping"},
+  {n:1, name:"Physical", c:"#f2b757", pdu:"Bits", tag:"The wire", desc:"Raw bits as electrical, optical, or radio signals over cables, fiber, or the air.", protos:["Ethernet PHY","DSL","Bluetooth","USB"], attack:"Wiretapping, jamming, cable cuts"},
+];
+const TCPIP = [
+  {n:4, name:"Application", c:"#a888ff", pdu:"Data", tag:"OSI 5–7 combined", desc:"Merges OSI's Application, Presentation, and Session — everything the app deals with.", protos:["HTTP/S","DNS","SMTP","TLS","SSH"], attack:"Phishing, injection, app DDoS"},
+  {n:3, name:"Transport", c:"#38d39f", pdu:"Segment", tag:"Host-to-host", desc:"Same as OSI L4 — TCP and UDP deliver data between processes using ports.", protos:["TCP","UDP","QUIC"], attack:"SYN flood, port scanning"},
+  {n:2, name:"Internet", c:"#5b9dff", pdu:"Packet", tag:"OSI L3", desc:"Addresses and routes packets across networks with IP.", protos:["IP","ICMP","BGP","IPsec"], attack:"IP spoofing, route hijack"},
+  {n:1, name:"Link", c:"#f2b757", pdu:"Frame", tag:"OSI 1–2 combined", desc:"Merges Physical + Data Link — the local hardware and framing.", protos:["Ethernet","Wi-Fi","ARP"], attack:"ARP spoofing, jamming"},
+];
+
+const PROTOCOLS = [
+  {name:"HTTP", l:"app", port:"80", tr:"TCP", sec:false, use:"Web page transfer (cleartext)"},
+  {name:"HTTPS", l:"app", port:"443", tr:"TCP", sec:true, use:"Web transfer encrypted with TLS"},
+  {name:"DNS", l:"app", port:"53", tr:"UDP/TCP", sec:false, use:"Resolves names to IP addresses"},
+  {name:"DoH / DoT", l:"app", port:"443 / 853", tr:"TCP", sec:true, use:"Encrypted DNS (over HTTPS / TLS)"},
+  {name:"FTP", l:"app", port:"20/21", tr:"TCP", sec:false, use:"File transfer (cleartext)"},
+  {name:"SFTP", l:"app", port:"22", tr:"TCP", sec:true, use:"File transfer over SSH"},
+  {name:"SSH", l:"app", port:"22", tr:"TCP", sec:true, use:"Encrypted remote shell & tunneling"},
+  {name:"Telnet", l:"app", port:"23", tr:"TCP", sec:false, use:"Remote shell (cleartext — avoid)"},
+  {name:"SMTP", l:"app", port:"25/587", tr:"TCP", sec:false, use:"Sending email between servers"},
+  {name:"IMAP / POP3", l:"app", port:"143 / 110", tr:"TCP", sec:false, use:"Retrieving email from a server"},
+  {name:"DHCP", l:"app", port:"67/68", tr:"UDP", sec:false, use:"Auto-assigns IP config to clients"},
+  {name:"SNMP", l:"app", port:"161", tr:"UDP", sec:false, use:"Monitoring & managing network devices"},
+  {name:"NTP", l:"app", port:"123", tr:"UDP", sec:false, use:"Clock synchronization"},
+  {name:"TCP", l:"tra", port:"—", tr:"—", sec:false, use:"Reliable, ordered, connection stream"},
+  {name:"UDP", l:"tra", port:"—", tr:"—", sec:false, use:"Fast, connectionless datagrams"},
+  {name:"QUIC", l:"tra", port:"443", tr:"UDP", sec:true, use:"Fast encrypted transport (HTTP/3)"},
+  {name:"TLS / SSL", l:"tra", port:"—", tr:"TCP", sec:true, use:"Encryption layer for app traffic"},
+  {name:"IP (v4/v6)", l:"net", port:"—", tr:"—", sec:false, use:"Logical addressing & routing"},
+  {name:"ICMP", l:"net", port:"—", tr:"—", sec:false, use:"Diagnostics (ping, traceroute)"},
+  {name:"IPsec", l:"net", port:"500", tr:"UDP", sec:true, use:"Encrypts/authenticates IP packets (VPN)"},
+  {name:"OSPF", l:"net", port:"—", tr:"IP", sec:false, use:"Interior routing protocol"},
+  {name:"BGP", l:"net", port:"179", tr:"TCP", sec:false, use:"Routing between autonomous systems"},
+  {name:"Ethernet", l:"lnk", port:"—", tr:"—", sec:false, use:"Wired LAN framing (802.3)"},
+  {name:"Wi-Fi (802.11)", l:"lnk", port:"—", tr:"—", sec:true, use:"Wireless LAN (WPA2/WPA3 encrypt)"},
+  {name:"ARP", l:"lnk", port:"—", tr:"—", sec:false, use:"Maps IP → MAC on a local link"},
+];
+
+const THREATS = [
+  {ico:"👂", name:"Sniffing / Eavesdropping", desc:"Capturing traffic on a shared or wireless medium to read cleartext data and credentials.", fix:"Encrypt everything — TLS, VPN, WPA3. Use switched networks."},
+  {ico:"🎭", name:"Man-in-the-Middle", desc:"Attacker secretly relays and can alter traffic between two parties (via ARP spoofing, rogue AP, SSL strip).", fix:"TLS with certificate validation, HSTS, mutual auth, DNSSEC."},
+  {ico:"🧨", name:"DoS / DDoS", desc:"Flooding a target with traffic (or botnet reflection) until it can't serve legitimate users.", fix:"Rate-limiting, anycast, scrubbing/CDN, BCP 38 ingress filtering."},
+  {ico:"🪪", name:"Spoofing", desc:"Forging a source identity — IP, MAC, ARP, or DNS — to impersonate a trusted host.", fix:"Ingress filtering, ARP inspection, 802.1X, DNSSEC."},
+  {ico:"🐟", name:"Phishing / Social Eng.", desc:"Tricking users into revealing credentials or running malware — the top breach entry point.", fix:"MFA, email filtering, user training, least privilege."},
+  {ico:"🔓", name:"Rogue Access Point", desc:"A fake Wi-Fi AP (evil twin) that lures clients to capture their traffic.", fix:"WPA3-Enterprise, 802.1X, wireless IDS, verify SSIDs."},
+  {ico:"🚪", name:"Port Scanning / Recon", desc:"Probing hosts to map open ports and services before an attack.", fix:"Close unused ports, firewall, IDS/IPS, minimal exposure."},
+  {ico:"🦠", name:"Malware / Lateral Movement", desc:"Once inside, malware spreads across flat networks to reach high-value systems.", fix:"Segmentation/VLANs, Zero Trust, EDR, patching."},
+];
+
+const QUIZ = [
+  {q:"Which network type covers the largest geographic area?", opts:["LAN","PAN","WAN","CAN"], a:2, why:"A WAN (Wide Area Network) spans regions or continents — the Internet is the largest WAN."},
+  {q:"At which OSI layer do switches operate using MAC addresses?", opts:["Layer 1 – Physical","Layer 2 – Data Link","Layer 3 – Network","Layer 4 – Transport"], a:1, why:"Switches forward frames by MAC address at Layer 2, the Data Link layer."},
+  {q:"Which transport protocol is connectionless and prioritizes speed over reliability?", opts:["TCP","UDP","TLS","BGP"], a:1, why:"UDP is connectionless with no handshake or delivery guarantee — fast, used by DNS, VoIP, gaming."},
+  {q:"HTTPS secures web traffic primarily by adding which protocol?", opts:["ARP","ICMP","TLS/SSL","DHCP"], a:2, why:"HTTPS is HTTP wrapped in TLS, which encrypts and authenticates the connection."},
+  {q:"An attacker forging ARP replies to intercept LAN traffic is performing…", opts:["A SYN flood","ARP spoofing (a MITM technique)","Port scanning","DNS amplification"], a:1, why:"ARP spoofing poisons the ARP cache so traffic flows through the attacker — a classic MITM setup."},
+  {q:"Which principle says 'never trust, always verify' with no implicit perimeter trust?", opts:["Defense in depth","CIA triad","Zero Trust","Least privilege"], a:2, why:"Zero Trust authenticates and authorizes every request regardless of network location."},
+];
+
+/* ---------------- RENDER: TYPES ---------------- */
+const scaleRow = document.getElementById('scaleRow');
+const scaleDetail = document.getElementById('scaleDetail');
+SCALES.forEach((s,i)=>{
+  const b=document.createElement('div'); b.className='scale-btn'+(i===0?' active':'');
+  b.innerHTML=`<div class="abbr">${s.abbr}</div><div class="rng">${s.rng}</div>`;
+  b.onclick=()=>{document.querySelectorAll('.scale-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');drawScale(s);};
+  scaleRow.appendChild(b);
+});
+function drawScale(s){
+  scaleDetail.innerHTML=`<div class="head"><h4>${s.name}</h4><span class="rng">${s.abbr} · ${s.rng}</span></div>
+    <p>${s.desc}</p><div class="ex">${s.ex.map(e=>`<span>${e}</span>`).join('')}</div>`;
+}
+drawScale(SCALES[0]);
+
+const topoGrid=document.getElementById('topoGrid');
+Object.entries(TOPOS).forEach(([name,t])=>{
+  const d=document.createElement('div'); d.className='topo';
+  d.innerHTML=`<svg viewBox="0 0 120 110">${t.svg}</svg><div class="name">${name}</div><div class="desc">${t.d}</div>`;
+  topoGrid.appendChild(d);
+});
+
+/* ---------------- RENDER: MODELS ---------------- */
+const stackCol=document.getElementById('stackCol');
+const layerInfo=document.getElementById('layerInfo');
+let curModel='osi';
+function renderStack(){
+  const data=curModel==='osi'?OSI:TCPIP;
+  stackCol.innerHTML='';
+  data.forEach((L,i)=>{
+    const el=document.createElement('div'); el.className='layer'+(i===0?' active':'');
+    el.style.setProperty('--lc',L.c);
+    el.innerHTML=`<div class="n" style="background:${L.c}">${L.n}</div><div class="lname">${L.name}</div><div class="lpdu">${L.pdu}</div>`;
+    el.onclick=()=>{stackCol.querySelectorAll('.layer').forEach(x=>x.classList.remove('active'));el.classList.add('active');drawLayer(L);};
+    stackCol.appendChild(el);
+  });
+  drawLayer(data[0]);
+}
+function drawLayer(L){
+  layerInfo.style.borderColor=L.c;
+  layerInfo.innerHTML=`<div class="tagline" style="color:${L.c}">Layer ${L.n} · ${L.tag}</div>
+    <h4>${L.name}</h4><p>${L.desc}</p>
+    <div class="protos">${L.protos.map(p=>`<span>${p}</span>`).join('')}</div>
+    <div class="attackline">⚠️ Typical attacks: ${L.attack}</div>`;
+}
+document.getElementById('modelToggle').addEventListener('click',e=>{
+  if(!e.target.dataset.model)return;
+  document.querySelectorAll('#modelToggle button').forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active'); curModel=e.target.dataset.model; renderStack();
+});
+renderStack();
+
+/* ---------------- RENDER: PROTOCOLS ---------------- */
+const protoBody=document.getElementById('protoBody');
+const noRes=document.getElementById('noRes');
+let curFilter='all', curSearch='';
+function renderProtos(){
+  const rows=PROTOCOLS.filter(p=>{
+    const okL=curFilter==='all'||p.l===curFilter;
+    const okS=!curSearch||(p.name+p.use).toLowerCase().includes(curSearch);
+    return okL&&okS;
+  });
+  noRes.style.display=rows.length?'none':'block';
+  const lbl={app:'App',tra:'Transport',net:'Network',lnk:'Link'};
+  protoBody.innerHTML=rows.map(p=>`<tr>
+    <td><span class="secdot" style="background:${p.sec?'var(--ok)':'var(--warn)'}" title="${p.sec?'Encrypted/secure':'Cleartext'}"></span><span class="pname">${p.name}</span></td>
+    <td><span class="lp ${p.l}">${lbl[p.l]}</span></td>
+    <td class="port">${p.port}</td>
+    <td class="port">${p.tr}</td>
+    <td>${p.use}</td></tr>`).join('');
+}
+document.getElementById('protoSearch').addEventListener('input',e=>{curSearch=e.target.value.toLowerCase().trim();renderProtos();});
+document.getElementById('protoFilters').addEventListener('click',e=>{
+  if(!e.target.dataset.l)return;
+  document.querySelectorAll('.fchip').forEach(c=>c.classList.remove('active'));
+  e.target.classList.add('active'); curFilter=e.target.dataset.l; renderProtos();
+});
+renderProtos();
+
+/* ---------------- RENDER: SECURITY ---------------- */
+const threatGrid=document.getElementById('threatGrid');
+THREATS.forEach(t=>{
+  const d=document.createElement('div'); d.className='threat';
+  d.innerHTML=`<div class="top"><div class="ico">${t.ico}</div><h4>${t.name}</h4></div>
+    <div class="body"><p>${t.desc}</p><div class="fix" style="display:none"><b>Defense:</b> ${t.fix}</div></div>`;
+  d.onclick=()=>{const f=d.querySelector('.fix');f.style.display=f.style.display==='none'?'block':'none';};
+  threatGrid.appendChild(d);
+});
+
+/* ---------------- QUIZ ---------------- */
+let qi=0, score=0, answered=false;
+const quizBody=document.getElementById('quizBody');
+const quizNext=document.getElementById('quizNext');
+const quizProg=document.getElementById('quizProg');
+const quizCount=document.getElementById('quizCount');
+function renderQ(){
+  answered=false; quizNext.disabled=true;
+  const Q=QUIZ[qi];
+  quizProg.style.width=(qi/QUIZ.length*100)+'%';
+  quizCount.textContent=`Question ${qi+1} of ${QUIZ.length}`;
+  quizNext.textContent = qi===QUIZ.length-1 ? 'See score →' : 'Next →';
+  quizBody.innerHTML=`<div class="q"><div class="qnum">Q${qi+1}</div><div class="qtext">${Q.q}</div>
+    <div id="opts"></div><div class="qfeed" id="qfeed"></div></div>`;
+  const opts=document.getElementById('opts');
+  Q.opts.forEach((o,i)=>{
+    const b=document.createElement('button'); b.className='opt'; b.textContent=o;
+    b.onclick=()=>pick(i,b); opts.appendChild(b);
+  });
+}
+function pick(i,btn){
+  if(answered)return; answered=true;
+  const Q=QUIZ[qi];
+  const all=[...document.querySelectorAll('.opt')];
+  all.forEach(b=>b.disabled=true);
+  all[Q.a].classList.add('correct');
+  if(i===Q.a){score++;}else{btn.classList.add('wrong');}
+  document.getElementById('qfeed').textContent=(i===Q.a?'✓ Correct. ':'✗ ')+Q.why;
+  quizNext.disabled=false;
+}
+quizNext.onclick=()=>{
+  if(qi<QUIZ.length-1){qi++;renderQ();}
+  else{
+    quizProg.style.width='100%'; quizCount.textContent='';
+    quizNext.style.display='none';
+    const pct=Math.round(score/QUIZ.length*100);
+    let msg = pct===100?'Perfect — you know your networks! 🏆':pct>=66?'Solid work. 👍':'Review the tabs and try again. 📚';
+    quizBody.innerHTML=`<div class="quiz-result"><div class="score">${score}/${QUIZ.length}</div>
+      <p style="color:var(--muted);margin:8px 0 16px">${msg}</p>
+      <button class="btn" onclick="restartQuiz()">↻ Retake quiz</button></div>`;
+  }
+};
+function restartQuiz(){qi=0;score=0;quizNext.style.display='';renderQ();}
+renderQ();
+
+/* ---------------- TAB SWITCH ---------------- */
+document.getElementById('tabs').addEventListener('click',e=>{
+  const t=e.target.closest('.tab'); if(!t)return;
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.panel-view').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  document.getElementById('view-'+t.dataset.view).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+</script>
+</body>
+</html>
