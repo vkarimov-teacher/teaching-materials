@@ -1,0 +1,1279 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Network Scanning Lab</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  --bg: #0c1117;
+  --bg-raised: #161b22;
+  --bg-surface: #1c2333;
+  --fg: #c9d1d9;
+  --fg-muted: #7d8590;
+  --fg-bright: #e6edf3;
+  --accent: #3fb950;
+  --accent-dim: rgba(63,185,80,0.15);
+  --cyan: #58a6ff;
+  --cyan-dim: rgba(88,166,255,0.12);
+  --orange: #d29922;
+  --red: #f85149;
+  --red-dim: rgba(248,81,73,0.12);
+  --purple: #bc8cff;
+  --border: #30363d;
+  --radius: 8px;
+  --radius-sm: 5px;
+  --font-mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace;
+  --font-body: 'Inter', -apple-system, system-ui, sans-serif;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 0 16px;
+  min-height: 100vh;
+}
+
+.top-bar {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 100;
+  background: rgba(12,17,23,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  margin: 0 -16px;
+  padding: 0 16px;
+}
+.top-bar-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  overflow-x: auto;
+}
+.top-bar .logo {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--accent);
+  white-space: nowrap;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.top-bar .logo svg { flex-shrink: 0; }
+.nav-btn {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--fg-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.nav-btn:hover { color: var(--fg-bright); background: var(--bg-raised); }
+.nav-btn.active { color: var(--accent); background: var(--accent-dim); }
+
+.container { max-width: 1100px; margin: 0 auto; padding-block: 24px 60px; }
+
+.section { display: none; }
+.section.active { display: block; }
+
+.section-header { margin-bottom: 28px; }
+.section-header h2 {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--fg-bright);
+  margin-bottom: 6px;
+}
+.section-header p {
+  color: var(--fg-muted);
+  font-size: 14px;
+  max-width: 65ch;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.card {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: border-color 0.2s;
+  min-width: 0;
+  cursor: pointer;
+}
+.card:hover { border-color: var(--fg-muted); }
+.card h3 {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--cyan);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card p { font-size: 13px; color: var(--fg-muted); line-height: 1.55; }
+
+.badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.badge-tcp { background: var(--accent-dim); color: var(--accent); }
+.badge-udp { background: var(--cyan-dim); color: var(--cyan); }
+.badge-stealth { background: var(--red-dim); color: var(--red); }
+
+.terminal {
+  background: #0d1117;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.terminal-bar {
+  background: var(--bg-surface);
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.terminal-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--border);
+}
+.terminal-dot:nth-child(1) { background: var(--red); }
+.terminal-dot:nth-child(2) { background: var(--orange); }
+.terminal-dot:nth-child(3) { background: var(--accent); }
+.terminal-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-muted);
+  margin-left: 8px;
+}
+.terminal-body {
+  padding: 16px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.7;
+  min-height: 180px;
+  max-height: 420px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.prompt-c { color: var(--accent); }
+.cmd-c { color: var(--fg-bright); }
+.comment-c { color: var(--fg-muted); font-style: italic; }
+.port-open { color: var(--accent); }
+.port-closed { color: var(--red); }
+.port-filtered { color: var(--orange); }
+.info-c { color: var(--cyan); }
+.highlight-c { color: var(--purple); }
+
+.cmd-input-wrap {
+  display: flex;
+  align-items: center;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0 12px;
+  margin-bottom: 16px;
+  transition: border-color 0.2s;
+}
+.cmd-input-wrap:focus-within { border-color: var(--accent); }
+.prompt-label {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  white-space: nowrap;
+  margin-right: 8px;
+}
+.cmd-input {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: none;
+  border: none;
+  color: var(--fg-bright);
+  padding: 12px 0;
+  outline: none;
+  min-width: 0;
+}
+.cmd-input::placeholder { color: var(--fg-muted); }
+.run-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: var(--accent);
+  color: var(--bg);
+  cursor: pointer;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+.run-btn:hover { opacity: 0.85; }
+.run-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.quick-cmds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.quick-cmd {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-raised);
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.quick-cmd:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  background: var(--cyan-dim);
+}
+
+.topology-container {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+}
+.topo-svg { width: 100%; max-width: 800px; margin: 0 auto; display: block; }
+
+.info-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+.info-panel h4 {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cyan);
+  margin-bottom: 8px;
+}
+.info-panel ul { list-style: none; padding: 0; }
+.info-panel li {
+  font-size: 13px;
+  padding: 4px 0;
+  color: var(--fg);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.info-panel li::before {
+  content: '\203A';
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.scan-types {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.scan-type-btn {
+  text-align: left;
+  padding: 14px 16px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--font-body);
+}
+.scan-type-btn:hover { border-color: var(--fg-muted); }
+.scan-type-btn.active { border-color: var(--cyan); background: var(--cyan-dim); }
+.st-name {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg-bright);
+  display: block;
+  margin-bottom: 4px;
+}
+.st-flag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+}
+.st-desc {
+  font-size: 12px;
+  color: var(--fg-muted);
+  margin-top: 4px;
+  line-height: 1.45;
+}
+
+.packet-diagram {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  min-width: 0;
+}
+.packet-diagram h4 {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg-bright);
+  margin-bottom: 14px;
+}
+
+.challenge {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--orange);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.challenge h4 {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--orange);
+  margin-bottom: 8px;
+}
+.challenge p { font-size: 13px; color: var(--fg); margin-bottom: 12px; }
+.hint-btn {
+  font-size: 12px;
+  color: var(--fg-muted);
+  background: none;
+  border: 1px dashed var(--border);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: all 0.15s;
+}
+.hint-btn:hover { border-color: var(--orange); color: var(--orange); }
+.hint-text {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--orange);
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: rgba(210,153,34,0.08);
+  border-radius: var(--radius-sm);
+}
+
+.port-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 16px;
+}
+.port-table th {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--fg-muted);
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.port-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+}
+.port-table tr:hover { background: var(--bg-surface); }
+
+.progress-bar {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+}
+.progress-step {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  transition: background 0.3s;
+}
+.progress-step.done { background: var(--accent); }
+
+.scan-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 600px) {
+  .card-grid { grid-template-columns: 1fr; }
+  .scan-types { grid-template-columns: 1fr; }
+  .section-header h2 { font-size: 18px; }
+  .terminal-body { font-size: 11.5px; min-height: 140px; }
+  .scan-detail-grid { grid-template-columns: 1fr; }
+}
+</style>
+
+<div class="top-bar">
+  <div class="top-bar-inner" id="nav-bar">
+    <span class="logo">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      NetScan Lab
+    </span>
+    <button class="nav-btn active" data-section="overview">Overview</button>
+    <button class="nav-btn" data-section="scan-types">Scan Types</button>
+    <button class="nav-btn" data-section="topology">Lab Network</button>
+    <button class="nav-btn" data-section="simulator">Simulator</button>
+    <button class="nav-btn" data-section="enumeration">Enumeration</button>
+    <button class="nav-btn" data-section="challenges">Challenges</button>
+  </div>
+</div>
+
+<div class="container">
+  <!-- OVERVIEW -->
+  <div class="section active" id="sec-overview">
+    <div class="section-header">
+      <h2>Network Scanning &amp; Enumeration</h2>
+      <p>Learn how to discover hosts, identify open ports, fingerprint services, and enumerate network resources using industry-standard tools and techniques.</p>
+    </div>
+    <div class="progress-bar" id="main-progress">
+      <div class="progress-step done"></div>
+      <div class="progress-step"></div>
+      <div class="progress-step"></div>
+      <div class="progress-step"></div>
+      <div class="progress-step"></div>
+    </div>
+    <div class="card-grid" id="overview-cards">
+      <div class="card" data-nav="scan-types">
+        <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Scan Types</h3>
+        <p>TCP Connect, SYN stealth, UDP, FIN, Xmas, and Null scans — when to use each and what flags they set in the TCP header.</p>
+      </div>
+      <div class="card" data-nav="topology">
+        <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> Lab Network</h3>
+        <p>A simulated lab topology with routers, servers, and workstations. Click any host to inspect its configuration and running services.</p>
+      </div>
+      <div class="card" data-nav="simulator">
+        <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg> Command Simulator</h3>
+        <p>Interactive terminal where you can run simulated nmap commands against the lab network and see realistic output.</p>
+      </div>
+      <div class="card" data-nav="enumeration">
+        <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Enumeration</h3>
+        <p>DNS, SMB, SNMP, SMTP, and banner grabbing techniques. Extract usernames, shares, network maps, and service versions.</p>
+      </div>
+      <div class="card" data-nav="challenges">
+        <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Challenges</h3>
+        <p>Hands-on exercises: discover hidden hosts, identify vulnerable services, and map the entire lab network using what you've learned.</p>
+      </div>
+      <div class="card" style="cursor:default">
+        <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Key Concepts</h3>
+        <p>Port states (open, closed, filtered), the three-way handshake, service fingerprinting, and OS detection methodology.</p>
+      </div>
+    </div>
+    <div class="info-panel">
+      <h4>Port States Reference</h4>
+      <ul>
+        <li><span class="port-open" style="font-family:var(--font-mono);font-weight:600">open</span> — An application is actively accepting connections on this port</li>
+        <li><span class="port-closed" style="font-family:var(--font-mono);font-weight:600">closed</span> — Port is reachable but no application is listening (responds with RST)</li>
+        <li><span class="port-filtered" style="font-family:var(--font-mono);font-weight:600">filtered</span> — Packet filtering (firewall) prevents probe from reaching the port</li>
+        <li><span style="font-family:var(--font-mono);font-weight:600;color:var(--purple)">open|filtered</span> — Unable to determine if port is open or filtered (no response)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SCAN TYPES -->
+  <div class="section" id="sec-scan-types">
+    <div class="section-header">
+      <h2>Scan Types &amp; TCP Flags</h2>
+      <p>Select a scan type to see its TCP flag configuration, packet exchange, and when to use it in a penetration test.</p>
+    </div>
+    <div class="scan-types" id="scan-type-list"></div>
+    <div class="scan-detail-grid">
+      <div class="packet-diagram" id="packet-vis">
+        <h4>TCP Flag Visualization</h4>
+        <div id="flag-display"></div>
+      </div>
+      <div class="info-panel" id="scan-info" style="margin:0">
+        <h4 id="scan-info-title">Select a scan type</h4>
+        <div id="scan-info-body">
+          <p style="color:var(--fg-muted)">Click one of the scan types above to see detailed information about how it works.</p>
+        </div>
+      </div>
+    </div>
+    <div class="terminal" style="margin-top:16px">
+      <div class="terminal-bar">
+        <div class="terminal-dot"></div><div class="terminal-dot"></div><div class="terminal-dot"></div>
+        <span class="terminal-title">Packet Exchange</span>
+      </div>
+      <div class="terminal-body" id="packet-exchange"><span class="comment-c"># Select a scan type to see the packet exchange diagram</span></div>
+    </div>
+  </div>
+
+  <!-- LAB TOPOLOGY -->
+  <div class="section" id="sec-topology">
+    <div class="section-header">
+      <h2>Lab Network Topology</h2>
+      <p>Click any host to inspect its open ports and running services. This is the target environment for the simulator.</p>
+    </div>
+    <div class="topology-container">
+      <svg class="topo-svg" viewBox="0 0 760 420" xmlns="http://www.w3.org/2000/svg" id="topo-svg">
+        <line x1="100" y1="200" x2="660" y2="200" stroke="#30363d" stroke-width="2" stroke-dasharray="6,4"/>
+        <text x="380" y="188" fill="#7d8590" font-size="10" font-family="Inter, sans-serif" text-anchor="middle">10.10.10.0/24</text>
+        <g data-host="router" style="cursor:pointer">
+          <rect x="350" y="30" width="60" height="40" rx="6" fill="#1c2333" stroke="#30363d" stroke-width="1.5"/>
+          <text x="380" y="55" fill="#3fb950" font-size="11" font-family="JetBrains Mono, monospace" text-anchor="middle" font-weight="600">GW</text>
+          <text x="380" y="90" fill="#7d8590" font-size="10" font-family="JetBrains Mono, monospace" text-anchor="middle">10.10.10.1</text>
+          <line x1="380" y1="70" x2="380" y2="200" stroke="#30363d" stroke-width="1.5"/>
+        </g>
+        <g data-host="web" style="cursor:pointer">
+          <rect x="70" y="240" width="60" height="40" rx="6" fill="#1c2333" stroke="#30363d" stroke-width="1.5"/>
+          <text x="100" y="265" fill="#58a6ff" font-size="11" font-family="JetBrains Mono, monospace" text-anchor="middle" font-weight="600">WEB</text>
+          <text x="100" y="300" fill="#7d8590" font-size="10" font-family="JetBrains Mono, monospace" text-anchor="middle">10.10.10.10</text>
+          <text x="100" y="315" fill="#7d8590" font-size="9" font-family="Inter, sans-serif" text-anchor="middle">Ubuntu 22.04</text>
+          <line x1="100" y1="200" x2="100" y2="240" stroke="#30363d" stroke-width="1.5"/>
+        </g>
+        <g data-host="db" style="cursor:pointer">
+          <rect x="220" y="240" width="60" height="40" rx="6" fill="#1c2333" stroke="#30363d" stroke-width="1.5"/>
+          <text x="250" y="265" fill="#d29922" font-size="11" font-family="JetBrains Mono, monospace" text-anchor="middle" font-weight="600">DB</text>
+          <text x="250" y="300" fill="#7d8590" font-size="10" font-family="JetBrains Mono, monospace" text-anchor="middle">10.10.10.20</text>
+          <text x="250" y="315" fill="#7d8590" font-size="9" font-family="Inter, sans-serif" text-anchor="middle">CentOS 8</text>
+          <line x1="250" y1="200" x2="250" y2="240" stroke="#30363d" stroke-width="1.5"/>
+        </g>
+        <g data-host="mail" style="cursor:pointer">
+          <rect x="350" y="240" width="60" height="40" rx="6" fill="#1c2333" stroke="#30363d" stroke-width="1.5"/>
+          <text x="380" y="265" fill="#bc8cff" font-size="11" font-family="JetBrains Mono, monospace" text-anchor="middle" font-weight="600">MAIL</text>
+          <text x="380" y="300" fill="#7d8590" font-size="10" font-family="JetBrains Mono, monospace" text-anchor="middle">10.10.10.30</text>
+          <text x="380" y="315" fill="#7d8590" font-size="9" font-family="Inter, sans-serif" text-anchor="middle">Debian 11</text>
+          <line x1="380" y1="200" x2="380" y2="240" stroke="#30363d" stroke-width="1.5"/>
+        </g>
+        <g data-host="file" style="cursor:pointer">
+          <rect x="480" y="240" width="60" height="40" rx="6" fill="#1c2333" stroke="#30363d" stroke-width="1.5"/>
+          <text x="510" y="265" fill="#f85149" font-size="11" font-family="JetBrains Mono, monospace" text-anchor="middle" font-weight="600">FILE</text>
+          <text x="510" y="300" fill="#7d8590" font-size="10" font-family="JetBrains Mono, monospace" text-anchor="middle">10.10.10.40</text>
+          <text x="510" y="315" fill="#7d8590" font-size="9" font-family="Inter, sans-serif" text-anchor="middle">Win Server 2019</text>
+          <line x1="510" y1="200" x2="510" y2="240" stroke="#30363d" stroke-width="1.5"/>
+        </g>
+        <g data-host="dns" style="cursor:pointer">
+          <rect x="630" y="240" width="60" height="40" rx="6" fill="#1c2333" stroke="#30363d" stroke-width="1.5"/>
+          <text x="660" y="265" fill="#3fb950" font-size="11" font-family="JetBrains Mono, monospace" text-anchor="middle" font-weight="600">DNS</text>
+          <text x="660" y="300" fill="#7d8590" font-size="10" font-family="JetBrains Mono, monospace" text-anchor="middle">10.10.10.50</text>
+          <text x="660" y="315" fill="#7d8590" font-size="9" font-family="Inter, sans-serif" text-anchor="middle">Ubuntu 20.04</text>
+          <line x1="660" y1="200" x2="660" y2="240" stroke="#30363d" stroke-width="1.5"/>
+        </g>
+        <g>
+          <rect x="70" y="100" width="60" height="40" rx="6" fill="#1c2333" stroke="#f85149" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <text x="100" y="125" fill="#f85149" font-size="10" font-family="JetBrains Mono, monospace" text-anchor="middle" font-weight="600">KALI</text>
+          <text x="100" y="155" fill="#7d8590" font-size="10" font-family="JetBrains Mono, monospace" text-anchor="middle">10.10.10.5</text>
+          <text x="100" y="170" fill="#7d8590" font-size="9" font-family="Inter, sans-serif" text-anchor="middle">Attacker (You)</text>
+          <line x1="100" y1="140" x2="100" y2="200" stroke="#f85149" stroke-width="1.5" stroke-dasharray="4,3"/>
+        </g>
+      </svg>
+    </div>
+    <div id="host-detail" class="info-panel" hidden>
+      <h4 id="host-detail-title">Host Details</h4>
+      <div id="host-detail-body"></div>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="port-table" id="host-ports" hidden>
+        <thead><tr><th>Port</th><th>State</th><th>Protocol</th><th>Service</th><th>Version</th></tr></thead>
+        <tbody id="host-ports-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SIMULATOR -->
+  <div class="section" id="sec-simulator">
+    <div class="section-header">
+      <h2>Command Simulator</h2>
+      <p>Type nmap commands against the lab network and see simulated output. Try the quick commands below or write your own.</p>
+    </div>
+    <div class="quick-cmds" id="quick-cmds">
+      <button class="quick-cmd" data-cmd="nmap -sn 10.10.10.0/24">Host Discovery</button>
+      <button class="quick-cmd" data-cmd="nmap -sS 10.10.10.10">SYN Scan</button>
+      <button class="quick-cmd" data-cmd="nmap -sT 10.10.10.20">TCP Connect</button>
+      <button class="quick-cmd" data-cmd="nmap -sU 10.10.10.50">UDP Scan</button>
+      <button class="quick-cmd" data-cmd="nmap -sV 10.10.10.10">Version Detect</button>
+      <button class="quick-cmd" data-cmd="nmap -O 10.10.10.40">OS Detection</button>
+      <button class="quick-cmd" data-cmd="nmap -A 10.10.10.30">Aggressive</button>
+      <button class="quick-cmd" data-cmd="nmap -sS -p 1-1000 10.10.10.10">Port Range</button>
+    </div>
+    <div class="cmd-input-wrap">
+      <span class="prompt-label">root@kali:~#</span>
+      <input class="cmd-input" id="cmd-input" type="text" placeholder="nmap -sS 10.10.10.10" spellcheck="false" autocomplete="off">
+      <button class="run-btn" id="run-btn">Run</button>
+    </div>
+    <div class="terminal">
+      <div class="terminal-bar">
+        <div class="terminal-dot"></div><div class="terminal-dot"></div><div class="terminal-dot"></div>
+        <span class="terminal-title">Terminal Output</span>
+      </div>
+      <div class="terminal-body" id="sim-output"><span class="comment-c"># Welcome to the Network Scanning Simulator
+# Type an nmap command or click a quick command above
+# Target network: 10.10.10.0/24
+#
+# Available targets:
+#   10.10.10.1   - Gateway Router
+#   10.10.10.10  - Web Server (Ubuntu)
+#   10.10.10.20  - Database Server (CentOS)
+#   10.10.10.30  - Mail Server (Debian)
+#   10.10.10.40  - File Server (Windows)
+#   10.10.10.50  - DNS Server (Ubuntu)</span></div>
+    </div>
+  </div>
+
+  <!-- ENUMERATION -->
+  <div class="section" id="sec-enumeration">
+    <div class="section-header">
+      <h2>Service Enumeration</h2>
+      <p>After discovering open ports, enumeration extracts detailed information: usernames, shares, DNS records, SNMP data, and more.</p>
+    </div>
+    <div class="card-grid">
+      <div class="card" style="cursor:default">
+        <h3><span class="badge badge-tcp">TCP 53</span> DNS Enumeration</h3>
+        <p>Zone transfers (AXFR), reverse lookups, subdomain brute-forcing, and DNS cache snooping to map the target's domain infrastructure.</p>
+        <div class="terminal" style="margin-top:12px;margin-bottom:0">
+          <div class="terminal-body" style="min-height:auto;max-height:180px"><span class="prompt-c">$</span> <span class="cmd-c">dig axfr lab.local @10.10.10.50</span>
+<span class="info-c">; &lt;&lt;&gt;&gt; DiG &lt;&lt;&gt;&gt; axfr lab.local @10.10.10.50</span>
+lab.local.     86400  IN  SOA   ns1.lab.local. admin.lab.local. 2024010101
+lab.local.     86400  IN  NS    ns1.lab.local.
+lab.local.     86400  IN  A     10.10.10.50
+<span class="port-open">web.lab.local.  3600  IN  A     10.10.10.10</span>
+<span class="port-open">db.lab.local.   3600  IN  A     10.10.10.20</span>
+<span class="port-open">mail.lab.local. 3600  IN  A     10.10.10.30</span>
+<span class="port-open">file.lab.local. 3600  IN  A     10.10.10.40</span>
+<span class="port-open">ns1.lab.local.  3600  IN  A     10.10.10.50</span></div>
+        </div>
+      </div>
+      <div class="card" style="cursor:default">
+        <h3><span class="badge badge-tcp">TCP 445</span> SMB Enumeration</h3>
+        <p>Listing shared folders, enumerating users via RID cycling, checking null sessions, and identifying accessible resources.</p>
+        <div class="terminal" style="margin-top:12px;margin-bottom:0">
+          <div class="terminal-body" style="min-height:auto;max-height:180px"><span class="prompt-c">$</span> <span class="cmd-c">smbclient -L //10.10.10.40 -N</span>
+<span class="info-c">Anonymous login successful</span>
+
+  Sharename     Type    Comment
+  ---------     ----    -------
+  <span class="port-open">Public        Disk    Public share</span>
+  <span class="port-open">IT-Backup     Disk    IT department backups</span>
+  <span class="port-filtered">Admin$        Disk    Remote Admin</span>
+  <span class="port-filtered">C$            Disk    Default share</span>
+  IPC$          IPC     IPC Service</div>
+        </div>
+      </div>
+      <div class="card" style="cursor:default">
+        <h3><span class="badge badge-udp">UDP 161</span> SNMP Enumeration</h3>
+        <p>Walking OID trees with community strings to extract system info, network interfaces, routing tables, and installed software.</p>
+        <div class="terminal" style="margin-top:12px;margin-bottom:0">
+          <div class="terminal-body" style="min-height:auto;max-height:180px"><span class="prompt-c">$</span> <span class="cmd-c">snmpwalk -v2c -c public 10.10.10.40</span>
+<span class="info-c">SNMPv2-MIB::sysDescr.0 =</span>
+  <span class="highlight-c">Hardware: Intel64 x64 Windows Server 2019 Build 17763</span>
+<span class="info-c">SNMPv2-MIB::sysUpTime.0 =</span> Timeticks: (5765432) 16:02:34.32
+<span class="info-c">IF-MIB::ifDescr.1 =</span> Ethernet0
+<span class="info-c">IF-MIB::ifPhysAddress.1 =</span> <span class="port-open">0a:1b:2c:3d:4e:5f</span>
+<span class="info-c">HOST-RESOURCES-MIB::hrSWInstalledName.1 =</span>
+  <span class="highlight-c">Microsoft SQL Server 2019</span></div>
+        </div>
+      </div>
+      <div class="card" style="cursor:default">
+        <h3><span class="badge badge-tcp">TCP 25</span> SMTP Enumeration</h3>
+        <p>Using VRFY and EXPN commands to verify email addresses and discover valid user accounts on the mail server.</p>
+        <div class="terminal" style="margin-top:12px;margin-bottom:0">
+          <div class="terminal-body" style="min-height:auto;max-height:180px"><span class="prompt-c">$</span> <span class="cmd-c">nc -nv 10.10.10.30 25</span>
+<span class="info-c">220 mail.lab.local ESMTP Postfix</span>
+<span class="prompt-c">VRFY</span> <span class="cmd-c">admin</span>
+<span class="port-open">252 2.0.0 admin</span>
+<span class="prompt-c">VRFY</span> <span class="cmd-c">root</span>
+<span class="port-open">252 2.0.0 root</span>
+<span class="prompt-c">VRFY</span> <span class="cmd-c">guest</span>
+<span class="port-closed">550 5.1.1 &lt;guest&gt;: Recipient address rejected</span>
+<span class="prompt-c">VRFY</span> <span class="cmd-c">backup</span>
+<span class="port-open">252 2.0.0 backup</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="info-panel">
+      <h4>Enumeration Methodology</h4>
+      <ul>
+        <li>Start with broad port scans to identify listening services</li>
+        <li>Banner grab each service to identify version and technology</li>
+        <li>Check for anonymous/null authentication on every service</li>
+        <li>Enumerate users, shares, and directory structures</li>
+        <li>Search for known vulnerabilities based on version information</li>
+        <li>Document every finding — missed details cost time later</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- CHALLENGES -->
+  <div class="section" id="sec-challenges">
+    <div class="section-header">
+      <h2>Practice Challenges</h2>
+      <p>Apply what you've learned. Use the simulator to answer each challenge. Click hints if you're stuck.</p>
+    </div>
+    <div class="challenge">
+      <h4>Challenge 1 — Host Discovery</h4>
+      <p>How many live hosts are on the 10.10.10.0/24 network? Use a ping sweep to find out.</p>
+      <button class="hint-btn" data-hint="Use nmap -sn 10.10.10.0/24 to perform a ping sweep without port scanning.">Show Hint</button>
+    </div>
+    <div class="challenge">
+      <h4>Challenge 2 — Identify the Web Stack</h4>
+      <p>What web server and version is running on 10.10.10.10? What other services are exposed?</p>
+      <button class="hint-btn" data-hint="Run a service version scan: nmap -sV 10.10.10.10">Show Hint</button>
+    </div>
+    <div class="challenge">
+      <h4>Challenge 3 — Stealth vs. Noise</h4>
+      <p>Why would you choose a SYN scan (-sS) over a TCP Connect scan (-sT) in a real engagement? What's the tradeoff?</p>
+      <button class="hint-btn" data-hint="SYN scans never complete the three-way handshake — the connection is never fully established, so it typically won't appear in application-level logs. But it requires root/raw socket privileges.">Show Hint</button>
+    </div>
+    <div class="challenge">
+      <h4>Challenge 4 — Find the Database</h4>
+      <p>The database server at 10.10.10.20 is running two database engines. Identify both and their port numbers.</p>
+      <button class="hint-btn" data-hint="Try nmap -sV -p 1-10000 10.10.10.20 or a targeted version detection scan.">Show Hint</button>
+    </div>
+    <div class="challenge">
+      <h4>Challenge 5 — OS Fingerprinting</h4>
+      <p>Determine the operating system of the file server (10.10.10.40) using nmap's OS detection. What OS family and version does it report?</p>
+      <button class="hint-btn" data-hint="Use nmap -O 10.10.10.40 for OS fingerprinting. The TTL and TCP window size are key indicators.">Show Hint</button>
+    </div>
+    <div class="challenge">
+      <h4>Challenge 6 — Full Network Map</h4>
+      <p>Produce a complete network map: every host, every open port, every service version, and every OS. What's the single nmap command that does it all?</p>
+      <button class="hint-btn" data-hint="The aggressive scan flag nmap -A 10.10.10.0/24 combines OS detection, version scanning, script scanning, and traceroute.">Show Hint</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ── LAB NETWORK DATA ──
+  var HOSTS = {
+    router: {
+      name: 'Gateway Router', ip: '10.10.10.1', os: 'Cisco IOS 15.7',
+      desc: 'Border gateway connecting the lab to the external network. Runs SNMP for monitoring.',
+      ports: [
+        { port: 22, state:'open', proto:'tcp', service:'SSH', version:'Cisco SSH 2.0' },
+        { port: 23, state:'filtered', proto:'tcp', service:'Telnet', version:'—' },
+        { port: 161, state:'open', proto:'udp', service:'SNMP', version:'SNMPv2c' },
+        { port: 443, state:'open', proto:'tcp', service:'HTTPS', version:'Cisco HTTPS Management' }
+      ]
+    },
+    web: {
+      name: 'Web Server', ip: '10.10.10.10', os: 'Ubuntu 22.04 LTS (Linux 5.15)',
+      desc: 'Production web server hosting the company portal. Apache with PHP backend and SSH for administration.',
+      ports: [
+        { port: 22, state:'open', proto:'tcp', service:'SSH', version:'OpenSSH 8.9p1' },
+        { port: 80, state:'open', proto:'tcp', service:'HTTP', version:'Apache httpd 2.4.52' },
+        { port: 443, state:'open', proto:'tcp', service:'HTTPS', version:'Apache httpd 2.4.52 (OpenSSL 3.0.2)' },
+        { port: 3306, state:'filtered', proto:'tcp', service:'MySQL', version:'—' },
+        { port: 8080, state:'open', proto:'tcp', service:'HTTP Proxy', version:'Apache Tomcat 9.0.58' }
+      ]
+    },
+    db: {
+      name: 'Database Server', ip: '10.10.10.20', os: 'CentOS Stream 8 (Linux 4.18)',
+      desc: 'Backend database server running both MySQL and PostgreSQL for different applications.',
+      ports: [
+        { port: 22, state:'open', proto:'tcp', service:'SSH', version:'OpenSSH 8.0p1' },
+        { port: 3306, state:'open', proto:'tcp', service:'MySQL', version:'MySQL 8.0.32' },
+        { port: 5432, state:'open', proto:'tcp', service:'PostgreSQL', version:'PostgreSQL 14.7' },
+        { port: 6379, state:'open', proto:'tcp', service:'Redis', version:'Redis 7.0.8' }
+      ]
+    },
+    mail: {
+      name: 'Mail Server', ip: '10.10.10.30', os: 'Debian 11 (Linux 5.10)',
+      desc: 'Corporate mail server running Postfix and Dovecot for email services.',
+      ports: [
+        { port: 22, state:'open', proto:'tcp', service:'SSH', version:'OpenSSH 8.4p1' },
+        { port: 25, state:'open', proto:'tcp', service:'SMTP', version:'Postfix smtpd 3.5.13' },
+        { port: 110, state:'open', proto:'tcp', service:'POP3', version:'Dovecot pop3d 2.3.13' },
+        { port: 143, state:'open', proto:'tcp', service:'IMAP', version:'Dovecot imapd 2.3.13' },
+        { port: 465, state:'open', proto:'tcp', service:'SMTPS', version:'Postfix smtpd (TLS)' },
+        { port: 993, state:'open', proto:'tcp', service:'IMAPS', version:'Dovecot imapd (TLS)' }
+      ]
+    },
+    file: {
+      name: 'File Server', ip: '10.10.10.40', os: 'Windows Server 2019 Build 17763',
+      desc: 'Windows file server providing SMB shares, SNMP monitoring, and Remote Desktop access.',
+      ports: [
+        { port: 135, state:'open', proto:'tcp', service:'MSRPC', version:'Microsoft Windows RPC' },
+        { port: 139, state:'open', proto:'tcp', service:'NetBIOS-SSN', version:'Windows NetBIOS-SSN' },
+        { port: 445, state:'open', proto:'tcp', service:'SMB', version:'Windows Server 2019 SMB 3.1.1' },
+        { port: 161, state:'open', proto:'udp', service:'SNMP', version:'SNMPv2c (public)' },
+        { port: 3389, state:'open', proto:'tcp', service:'RDP', version:'Microsoft Terminal Services' },
+        { port: 1433, state:'filtered', proto:'tcp', service:'MSSQL', version:'—' }
+      ]
+    },
+    dns: {
+      name: 'DNS Server', ip: '10.10.10.50', os: 'Ubuntu 20.04 LTS (Linux 5.4)',
+      desc: 'Internal DNS server managing lab.local zone. Also serves as NTP source for the network.',
+      ports: [
+        { port: 22, state:'open', proto:'tcp', service:'SSH', version:'OpenSSH 8.2p1' },
+        { port: 53, state:'open', proto:'tcp', service:'DNS', version:'BIND 9.16.1' },
+        { port: 53, state:'open', proto:'udp', service:'DNS', version:'BIND 9.16.1' },
+        { port: 123, state:'open', proto:'udp', service:'NTP', version:'NTP v4' }
+      ]
+    }
+  };
+
+  // ── SCAN TYPES DATA ──
+  var SCAN_TYPES = [
+    {
+      name: 'TCP Connect', flag: '-sT', badges: ['tcp'],
+      desc: 'Completes the full three-way handshake (SYN → SYN/ACK → ACK). Reliable but logged by the target. Does not require root privileges.',
+      flags: { SYN:1, ACK:0, FIN:0, RST:0, PSH:0, URG:0 },
+      exchange: [
+        { dir:'→', from:'Attacker', to:'Target', pkt:'SYN', color:'#58a6ff' },
+        { dir:'←', from:'Target', to:'Attacker', pkt:'SYN/ACK (open)', color:'#3fb950' },
+        { dir:'→', from:'Attacker', to:'Target', pkt:'ACK', color:'#58a6ff' },
+        { dir:'→', from:'Attacker', to:'Target', pkt:'RST (close)', color:'#f85149' },
+        { note:'If port closed:' },
+        { dir:'←', from:'Target', to:'Attacker', pkt:'RST/ACK', color:'#f85149' }
+      ]
+    },
+    {
+      name: 'SYN Stealth', flag: '-sS', badges: ['tcp','stealth'],
+      desc: 'Sends SYN but never completes the handshake — sends RST after receiving SYN/ACK. Faster and stealthier. Requires root/raw sockets.',
+      flags: { SYN:1, ACK:0, FIN:0, RST:0, PSH:0, URG:0 },
+      exchange: [
+        { dir:'→', from:'Attacker', to:'Target', pkt:'SYN', color:'#58a6ff' },
+        { dir:'←', from:'Target', to:'Attacker', pkt:'SYN/ACK (open)', color:'#3fb950' },
+        { dir:'→', from:'Attacker', to:'Target', pkt:'RST (abort)', color:'#f85149' },
+        { note:'If port closed:' },
+        { dir:'←', from:'Target', to:'Attacker', pkt:'RST', color:'#f85149' }
+      ]
+    },
+    {
+      name: 'UDP Scan', flag: '-sU', badges: ['udp'],
+      desc: 'Sends empty UDP datagrams (or protocol-specific payloads). Slow because open ports often don\'t respond. ICMP Port Unreachable = closed.',
+      flags: { SYN:0, ACK:0, FIN:0, RST:0, PSH:0, URG:0 },
+      exchange: [
+        { dir:'→', from:'Attacker', to:'Target', pkt:'UDP Datagram', color:'#58a6ff' },
+        { dir:'←', from:'Target', to:'Attacker', pkt:'UDP Response (open)', color:'#3fb950' },
+        { note:'Or no response → open|filtered' },
+        { note:'If port closed:' },
+        { dir:'←', from:'Target', to:'Attacker', pkt:'ICMP Port Unreachable', color:'#f85149' }
+      ]
+    },
+    {
+      name: 'FIN Scan', flag: '-sF', badges: ['tcp','stealth'],
+      desc: 'Sends a packet with only the FIN flag set. Closed ports respond with RST; open ports silently drop the packet. Can bypass some stateless firewalls.',
+      flags: { SYN:0, ACK:0, FIN:1, RST:0, PSH:0, URG:0 },
+      exchange: [
+        { dir:'→', from:'Attacker', to:'Target', pkt:'FIN', color:'#58a6ff' },
+        { note:'No response → open|filtered' },
+        { note:'If port closed:' },
+        { dir:'←', from:'Target', to:'Attacker', pkt:'RST', color:'#f85149' }
+      ]
+    },
+    {
+      name: 'Xmas Scan', flag: '-sX', badges: ['tcp','stealth'],
+      desc: 'Sets FIN, PSH, and URG flags simultaneously (the packet is "lit up like a Christmas tree"). Same logic as FIN scan but uses more flags.',
+      flags: { SYN:0, ACK:0, FIN:1, RST:0, PSH:1, URG:1 },
+      exchange: [
+        { dir:'→', from:'Attacker', to:'Target', pkt:'FIN/PSH/URG', color:'#58a6ff' },
+        { note:'No response → open|filtered' },
+        { note:'If port closed:' },
+        { dir:'←', from:'Target', to:'Attacker', pkt:'RST', color:'#f85149' }
+      ]
+    },
+    {
+      name: 'Null Scan', flag: '-sN', badges: ['tcp','stealth'],
+      desc: 'Sends a TCP packet with no flags set at all. Like FIN scan: no response means open|filtered, RST means closed. Doesn\'t work against Windows.',
+      flags: { SYN:0, ACK:0, FIN:0, RST:0, PSH:0, URG:0 },
+      exchange: [
+        { dir:'→', from:'Attacker', to:'Target', pkt:'(no flags)', color:'#58a6ff' },
+        { note:'No response → open|filtered' },
+        { note:'If port closed:' },
+        { dir:'←', from:'Target', to:'Attacker', pkt:'RST', color:'#f85149' }
+      ]
+    }
+  ];
+
+  // ── NAVIGATION ──
+  var sectionMap = { overview:0, 'scan-types':1, topology:2, simulator:3, enumeration:4, challenges:5 };
+
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });
+    var sec = document.getElementById('sec-' + id);
+    if (sec) sec.classList.add('active');
+    var btns = document.querySelectorAll('.nav-btn');
+    btns.forEach(function(b) { b.classList.remove('active'); });
+    var idx = sectionMap[id];
+    if (idx !== undefined && btns[idx]) btns[idx].classList.add('active');
+    var steps = document.querySelectorAll('.progress-step');
+    steps.forEach(function(s, i) {
+      if (i <= (idx || 0)) s.classList.add('done');
+      else s.classList.remove('done');
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Nav buttons
+  document.getElementById('nav-bar').addEventListener('click', function(e) {
+    var btn = e.target.closest('.nav-btn');
+    if (!btn) return;
+    var sec = btn.getAttribute('data-section');
+    if (sec) showSection(sec);
+  });
+
+  // Overview cards
+  document.getElementById('overview-cards').addEventListener('click', function(e) {
+    var card = e.target.closest('.card');
+    if (!card) return;
+    var nav = card.getAttribute('data-nav');
+    if (nav) showSection(nav);
+  });
+
+  // ── SCAN TYPES ──
+  function initScanTypes() {
+    var container = document.getElementById('scan-type-list');
+    SCAN_TYPES.forEach(function(st, i) {
+      var btn = document.createElement('button');
+      btn.className = 'scan-type-btn' + (i === 0 ? ' active' : '');
+      btn.setAttribute('data-scan-idx', i);
+      var badgesHtml = st.badges.map(function(b) {
+        return '<span class="badge badge-' + b + '" style="margin-right:4px">' + b + '</span>';
+      }).join('');
+      btn.innerHTML = '<span class="st-name">' + st.name + '</span><span class="st-flag">' + st.flag + '</span><span class="st-desc">' + badgesHtml + '</span>';
+      container.appendChild(btn);
+    });
+    container.addEventListener('click', function(e) {
+      var btn = e.target.closest('.scan-type-btn');
+      if (!btn) return;
+      var idx = parseInt(btn.getAttribute('data-scan-idx'), 10);
+      selectScanType(idx);
+    });
+    selectScanType(0);
+  }
+
+  function selectScanType(idx) {
+    document.querySelectorAll('.scan-type-btn').forEach(function(b) { b.classList.remove('active'); });
+    var btns = document.querySelectorAll('.scan-type-btn');
+    if (btns[idx]) btns[idx].classList.add('active');
+    var st = SCAN_TYPES[idx];
+
+    // Flag display
+    var flagDiv = document.getElementById('flag-display');
+    var flagNames = Object.keys(st.flags);
+    var flagHtml = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">';
+    flagNames.forEach(function(f) {
+      var on = st.flags[f];
+      var borderC = on ? 'var(--accent)' : 'var(--border)';
+      var bgC = on ? 'var(--accent-dim)' : 'var(--bg)';
+      var txtC = on ? 'var(--accent)' : 'var(--fg-muted)';
+      flagHtml += '<div style="text-align:center;padding:8px 12px;border-radius:6px;border:1px solid ' + borderC + ';background:' + bgC + ';min-width:52px">';
+      flagHtml += '<div style="font-family:var(--font-mono);font-size:12px;font-weight:600;color:' + txtC + '">' + f + '</div>';
+      flagHtml += '<div style="font-family:var(--font-mono);font-size:16px;font-weight:700;color:' + txtC + ';margin-top:2px">' + (on ? '1' : '0') + '</div>';
+      flagHtml += '</div>';
+    });
+    flagHtml += '</div>';
+    flagDiv.innerHTML = flagHtml;
+
+    // Info
+    document.getElementById('scan-info-title').textContent = st.name + ' Scan';
+    document.getElementById('scan-info-body').innerHTML =
+      '<p style="margin-bottom:12px">' + st.desc + '</p>' +
+      '<div style="font-family:var(--font-mono);font-size:12px;color:var(--accent);background:var(--accent-dim);padding:8px 12px;border-radius:6px">nmap ' + st.flag + ' &lt;target&gt;</div>';
+
+    // Packet exchange
+    var exDiv = document.getElementById('packet-exchange');
+    var lines = st.exchange.map(function(e) {
+      if (e.note) return '<span class="comment-c"># ' + e.note + '</span>';
+      var arrow = e.dir === '→' ? '──────▶' : '◀──────';
+      return '<span style="color:' + e.color + '">' + pad(e.from, 10) + ' ' + arrow + ' ' + pad(e.to, 10) + '  [' + e.pkt + ']</span>';
+    });
+    exDiv.innerHTML = lines.join('\n');
+  }
+
+  function pad(s, n) {
+    while (s.length < n) s += ' ';
+    return s;
+  }
+
+  // ── HOST DETAIL ──
+  var topoSvg = document.getElementById('topo-svg');
+  if (topoSvg) {
+    topoSvg.addEventListener('click', function(e) {
+      var g = e.target.closest('g[data-host]');
+      if (!g) return;
+      var hostId = g.getAttribute('data-host');
+      selectHost(hostId);
+    });
+  }
+
+  function selectHost(id) {
+    var host = HOSTS[id];
+    if (!host) return;
+
+    // Highlight
+    document.querySelectorAll('#topo-svg g[data-host] rect').forEach(function(r) {
+      r.setAttribute('stroke', '#30363d');
+    });
+    var el = document.querySelector('#topo-svg g[data-host="' + id + '"] rect');
+    if (el) el.setAttribute('stroke', '#58a6ff');
+
+    var detail = document.getElementById('host-detail');
+    detail.hidden = false;
+    document.getElementById('host-detail-title').textContent = host.name + ' — ' + host.ip;
+    document.getElementById('host-detail-body').innerHTML =
+      '<p style="margin-bottom:8px">' + host.desc + '</p>' +
+      '<p style="font-family:var(--font-mono);font-size:12px;color:var(--purple)">OS: ' + host.os + '</p>';
+
+    var table = document.getElementById('host-ports');
+    table.hidden = false;
+    var tbody = document.getElementById('host-ports-body');
+    tbody.innerHTML = host.ports.map(function(p) {
+      return '<tr><td>' + p.port + '</td><td><span class="port-' + p.state + '">' + p.state + '</span></td><td>' + p.proto + '</td><td>' + p.service + '</td><td style="color:var(--fg-muted)">' + p.version + '</td></tr>';
+    }).join('');
+  }
+
+  // ── SIMULATOR ──
+  var cmdInput = document.getElementById('cmd-input');
+  var runBtn = document.getElementById('run-btn');
+
+  runBtn.addEventListener('click', function() { executeCommand(); });
+  cmdInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') executeCommand();
+  });
+
+  document.getElementById('quick-cmds').addEventListener('click', function(e) {
+    var btn = e.target.closest('.quick-cmd');
+    if (!btn) return;
+    var cmd = btn.getAttribute('data-cmd');
+    if (cmd) {
+      cmdInput.value = cmd;
+      executeCommand();
+    }
+  });
+
+  function executeCommand() {
+    var raw = cmdInput.value.trim();
+    if (!raw) return;
+
+    var output = document.getElementById('sim-output');
+    runBtn.disabled = true;
+
+    var result = simulateNmap(raw);
+    output.innerHTML = '<span class="prompt-c">root@kali:~#</span> <span class="cmd-c">' + escHtml(raw) + '</span>\n\n';
+
+    var lines = result.split('\n');
+    var idx = 0;
+    function typeLine() {
+      if (idx < lines.length) {
+        output.innerHTML += lines[idx] + '\n';
+        output.scrollTop = output.scrollHeight;
+        idx++;
+        setTimeout(typeLine, 25 + Math.random() * 40);
+      } else {
+        runBtn.disabled = false;
+      }
+    }
+    setTimeout(typeLine, 300);
+  }
+
+  function escHtml(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function simulateNmap(cmd) {
+    var lower = cmd.toLowerCase();
+    if (lower.indexOf('nmap ') !== 0) {
+      return '<span class="comment-c">Simulator supports nmap commands. Try: nmap -sS 10.10.10.10</span>';
+    }
+
+    var flags = {
+      sn: /\-sn\b/.test(lower) || /\-sP\b/.test(lower),
+      sS: /\-sS\b/.test(cmd),
+      sT: /\-sT\b/.test(cmd),
+      sU: /\-sU\b/.test(cmd),
+      sV: /\-sV\b/.test(cmd),
+      sF: /\-sF\b/.test(cmd),
+      sX: /\-sX\b/.test(cmd),
+      sN: /\-sN\b/.test(cmd),
+      O:  /\-O\b/.test(cmd),
+      A:  /\-A\b/.test(cmd)
+    };
+
+    var portRange = null;
+    var pm = cmd.match(/\-p\s*(\d+)\-(\d+)/);
+    if (pm) portRange = [parseInt(pm[1], 10), parseInt(pm[2], 10)];
+    var ps = cmd.match(/\-p\s*(\d+)(?:\s|$)/);
+    if (ps && !pm) portRange = [parseInt(ps[1], 10), parseInt(ps[1], 10)];
+
+    var ipMatch = cmd.match(/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?:\/\d{1,2})?)/);
+    if (!ipMatch) return '<span class="port-closed">Error: No target specified. Usage: nmap [options] target</span>';
+
+    var target = ipMatch[1];
+    var isSubnet = target.indexOf('/24') !== -1;
+    var now = new Date();
+    var ts = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0') + ' ' + String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+
+    if (flags.sn) {
+      if (!isSubnet) {
+        var h = findHost(target);
+        if (!h) return hostDown(target, ts);
+        return '<span class="info-c">Starting Nmap 7.94 ( https://nmap.org ) at ' + ts + '</span>\n' +
+               '<span class="port-open">Nmap scan report for ' + h.ip + '</span>\n' +
+               '<span class="port-open">Host is up (0.0012s latency).</span>\n' +
+               '<span class="info-c">Nmap done: 1 IP address (1 host up) scanned in 0.04 seconds</span>';
+      }
+      var out = '<span class="info-c">Starting Nmap 7.94 ( https://nmap.org ) at ' + ts + '</span>\n';
+      var hostKeys = Object.keys(HOSTS);
+      hostKeys.forEach(function(k) {
+        var hh = HOSTS[k];
+        out += '<span class="port-open">Nmap scan report for ' + hh.ip + '</span>\n';
+        out += 'Host is up (0.00' + (Math.floor(Math.random()*9)+1) + '' + Math.floor(Math.random()*9) + 's latency).\n';
+      });
+      out += '\n<span class="info-c">Nmap done: 256 IP addresses (' + hostKeys.length + ' hosts up) scanned in 2.38 seconds</span>';
+      return out;
+    }
+
+    if (isSubnet) {
+      var out2 = '<span class="info-c">Starting Nmap 7.94 ( https://nmap.org ) at ' + ts + '</span>\n';
+      Object.keys(HOSTS).forEach(function(k) {
+        out2 += formatHostScan(HOSTS[k], flags, portRange) + '\n';
+      });
+      out2 += '<span class="info-c">Nmap done: 256 IP addresses (' + Object.keys(HOSTS).length + ' hosts up) scanned in 14.72 seconds</span>';
+      return out2;
+    }
+
+    var host = findHost(target);
+    if (!host) return hostDown(target, ts);
+
+    var out3 = '<span class="info-c">Starting Nmap 7.94 ( https://nmap.org ) at ' + ts + '</span>\n';
+    out3 += formatHostScan(host, flags, portRange);
+    out3 += '\n<span class="info-c">Nmap done: 1 IP address (1 host up) scanned in ' + (1 + Math.random() * 3).toFixed(2) + ' seconds</span>';
+    return out3;
+  }
+
+  function findHost(ip) {
+    var keys = Object.keys(HOSTS);
+    for (var i = 0; i < keys.length; i++) {
+      if (HOSTS[keys[i]].ip === ip) return HOSTS[keys[i]];
+    }
+    return null;
+  }
+
+  function hostDown(ip, ts) {
+    return '<span class="info-c">Starting Nmap 7.94 ( https://nmap.org ) at ' + ts + '</span>\n' +
+           '<span class="port-closed">Note: Host ' + ip + ' seems down.</span>\n' +
+           '<span class="info-c">Nmap done: 1 IP address (0 hosts up) scanned in 3.05 seconds</span>';
+  }
+
+  function formatHostScan(host, flags, portRange) {
+    var out = '<span class="port-open">Nmap scan report for ' + host.ip + '</span>\n';
+    out += 'Host is up (0.00' + (Math.floor(Math.random()*9)+1) + '' + Math.floor(Math.random()*9) + 's latency).\n';
+
+    var ports = host.ports.slice();
+    var scanUdp = flags.sU;
+    var scanTcp = !scanUdp || flags.sS || flags.sT || flags.sF || flags.sX || flags.sN || flags.A;
+
+    if (scanUdp && !scanTcp) {
+      ports = ports.filter(function(p) { return p.proto === 'udp'; });
+    } else if (!scanUdp) {
+      ports = ports.filter(function(p) { return p.proto === 'tcp'; });
+    }
+
+    if (portRange) {
+      ports = ports.filter(function(p) { return p.port >= portRange[0] && p.port <= portRange[1]; });
+    }
+
+    if (ports.length === 0) {
+      out += 'All scanned ports are closed or filtered.\n';
+    } else {
+      if (!portRange) out += 'Not shown: ' + (1000 - ports.length) + ' closed ports\n';
+      out += 'PORT      STATE     SERVICE         VERSION\n';
+      ports.forEach(function(p) {
+        var portStr = (p.port + '/' + p.proto);
+        while (portStr.length < 10) portStr += ' ';
+        var stateStr = p.state;
+        while (stateStr.length < 10) stateStr += ' ';
+        var svcStr = p.service;
+        while (svcStr.length < 16) svcStr += ' ';
+        var cls = 'port-' + p.state;
+        if (flags.sV || flags.A) {
+          out += '<span class="' + cls + '">' + portStr + stateStr + svcStr + p.version + '</span>\n';
+        } else {
+          out += '<span class="' + cls + '">' + portStr + stateStr + p.service + '</span>\n';
+        }
+      });
+    }
+
+    if (flags.O || flags.A) {
+      var isWin = host.os.toLowerCase().indexOf('windows') !== -1;
+      out += '\n<span class="highlight-c">OS detection:</span>\n';
+      out += '<span class="highlight-c">Running: ' + host.os.split('(')[0].trim() + '</span>\n';
+      out += '<span class="highlight-c">OS details: ' + host.os + '</span>\n';
+      out += '<span class="info-c">TCP/IP fingerprint: TTL=' + (isWin ? 128 : 64) + ', Window=' + (isWin ? 65535 : 29200) + '</span>\n';
+    }
+
+    if (flags.A) {
+      out += '\n<span class="info-c">TRACEROUTE (using port ' + (ports.length > 0 ? ports[0].port : 80) + '/tcp)</span>\n';
+      out += 'HOP  RTT     ADDRESS\n';
+      out += '1    0.52ms  10.10.10.1\n';
+      if (host.ip !== '10.10.10.1') out += '2    1.04ms  ' + host.ip + '\n';
+    }
+
+    return out;
+  }
+
+  // ── CHALLENGES HINTS ──
+  document.getElementById('sec-challenges').addEventListener('click', function(e) {
+    var btn = e.target.closest('.hint-btn');
+    if (!btn) return;
+    var existing = btn.parentElement.querySelector('.hint-text');
+    if (existing) {
+      existing.remove();
+      btn.textContent = 'Show Hint';
+      return;
+    }
+    var div = document.createElement('div');
+    div.className = 'hint-text';
+    div.textContent = btn.getAttribute('data-hint');
+    btn.after(div);
+    btn.textContent = 'Hide Hint';
+  });
+
+  // ── INIT ──
+  initScanTypes();
+})();
+</script>
+</body></html>
