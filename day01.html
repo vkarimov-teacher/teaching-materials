@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 1 · Intro to Networks &amp; Security Fundamentals</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#F5F6FB;
+    --surface:#FFFFFF;
+    --ink:#15171F;
+    --slate:#5A6274;
+    --line:#E5E8F1;
+    --indigo:#4F46E5;
+    --indigo-soft:#ECEBFD;
+    --sky:#0EA5E9;
+    --sky-soft:#E1F3FD;
+    --coral:#F43F5E;
+    --coral-soft:#FDE7EC;
+    --emerald:#0F9F6E;
+    --emerald-soft:#DDF5EC;
+    --amber:#E4922B;
+    --ink-panel:#181A2A;
+    --sans:"Inter",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    --display:"Sora",var(--sans);
+    --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+    --r:16px;
+    --maxw:1060px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--canvas);color:var(--ink);font-family:var(--sans);
+    font-size:16.5px;line-height:1.6;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3,h4{font-family:var(--display);letter-spacing:-.015em;line-height:1.14;font-weight:600;margin:0;}
+  p{margin:0 0 14px;}
+  button{font-family:inherit;}
+
+  /* progress + nav */
+  .prog{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--sky),var(--indigo),var(--coral));
+    width:0;z-index:60;transition:width .1s linear;}
+  .nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.9);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);}
+  .nav .in{max-width:var(--maxw);margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .logo{font-family:var(--display);font-weight:700;font-size:15px;}
+  .logo b{color:var(--indigo);}
+  .logo span{font-family:var(--mono);font-size:11px;color:var(--slate);font-weight:400;}
+  .navpills{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap;}
+  .navpills a{font-size:13px;color:var(--slate);text-decoration:none;padding:6px 12px;border-radius:20px;transition:.15s;}
+  .navpills a:hover{background:var(--indigo-soft);color:var(--indigo);}
+
+  /* hero */
+  .hero{max-width:var(--maxw);margin:0 auto;padding:52px 20px 26px;}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);
+    padding:6px 13px;border-radius:20px;font-size:12.5px;color:var(--slate);font-family:var(--mono);margin-bottom:18px;}
+  .eyebrow i{width:8px;height:8px;border-radius:50%;background:var(--emerald);display:inline-block;}
+  .hero h1{font-size:clamp(30px,5.5vw,52px);font-weight:700;max-width:15ch;margin-bottom:16px;}
+  .hero h1 em{font-style:normal;background:linear-gradient(120deg,var(--sky),var(--indigo));-webkit-background-clip:text;
+    background-clip:text;color:transparent;}
+  .hero .sub{font-size:19px;color:var(--slate);max-width:60ch;margin-bottom:22px;}
+  .hint{display:inline-flex;align-items:center;gap:9px;font-size:14px;color:var(--indigo);
+    background:var(--indigo-soft);padding:9px 15px;border-radius:12px;font-weight:500;}
+  .hint .pulse{width:9px;height:9px;border-radius:50%;background:var(--indigo);
+    box-shadow:0 0 0 0 rgba(79,70,229,.5);animation:pulse 2s infinite;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(79,70,229,.5);}70%{box-shadow:0 0 0 10px rgba(79,70,229,0);}100%{box-shadow:0 0 0 0 rgba(79,70,229,0);}}
+
+  main{max-width:var(--maxw);margin:0 auto;padding:0 20px 70px;}
+  .block{margin-top:30px;}
+  .block-head{display:flex;align-items:center;gap:12px;margin:34px 0 4px;}
+  .tag{font-family:var(--mono);font-size:12px;font-weight:500;padding:4px 10px;border-radius:8px;}
+  .tag.net{background:var(--sky-soft);color:#0673a0;}
+  .tag.sec{background:var(--coral-soft);color:#c02942;}
+  .tag.test{background:var(--indigo-soft);color:var(--indigo);}
+  .block-head h2{font-size:26px;}
+  .lede{color:var(--slate);max-width:70ch;margin:6px 0 10px;}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);}
+  .pad{padding:22px 24px;}
+  h3.mini{font-size:18px;margin:26px 0 10px;}
+
+  /* objectives */
+  .obj{display:grid;grid-template-columns:1fr 1fr;gap:10px 22px;margin:8px 0 0;}
+  .ob{display:flex;gap:12px;align-items:flex-start;cursor:pointer;padding:8px 10px;border-radius:10px;transition:.15s;user-select:none;}
+  .ob:hover{background:var(--canvas);}
+  .ob .box{flex:0 0 20px;height:20px;border-radius:6px;border:2px solid var(--indigo);margin-top:2px;
+    display:flex;align-items:center;justify-content:center;transition:.15s;}
+  .ob .box svg{width:12px;height:12px;opacity:0;transform:scale(.5);transition:.15s;}
+  .ob.done .box{background:var(--indigo);}
+  .ob.done .box svg{opacity:1;transform:scale(1);}
+  .ob.done .lbl{color:var(--slate);text-decoration:line-through;}
+  .ob .lbl{font-size:15px;}
+  .obj-meter{font-family:var(--mono);font-size:13px;color:var(--slate);margin-top:12px;}
+  .obj-meter b{color:var(--indigo);}
+
+  /* OSI explorer */
+  .osi-wrap{display:grid;grid-template-columns:1fr 1.15fr;gap:16px;margin-top:6px;}
+  .osi-controls{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+  .toggle{display:inline-flex;background:var(--canvas);border:1px solid var(--line);border-radius:10px;padding:3px;}
+  .toggle button{border:none;background:none;padding:7px 14px;border-radius:8px;font-size:13.5px;cursor:pointer;color:var(--slate);font-weight:500;}
+  .toggle button.on{background:var(--surface);color:var(--indigo);box-shadow:0 1px 3px rgba(0,0,0,.08);}
+  .stack{display:flex;flex-direction:column;gap:6px;}
+  .layer{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:12px;
+    padding:12px 14px;cursor:pointer;background:var(--surface);transition:.15s;position:relative;}
+  .layer:hover{border-color:var(--sky);transform:translateX(3px);}
+  .layer.active{border-color:var(--sky);background:var(--sky-soft);box-shadow:0 3px 12px rgba(14,165,233,.15);}
+  .layer .no{font-family:var(--mono);font-size:13px;color:var(--sky);font-weight:500;width:20px;}
+  .layer .nm{font-family:var(--display);font-weight:600;font-size:15px;}
+  .layer .pdu{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--slate);
+    background:var(--canvas);padding:3px 8px;border-radius:6px;}
+  .tcpband{position:absolute;left:-1px;top:-1px;bottom:-1px;width:5px;border-radius:12px 0 0 12px;}
+  .osi-detail{align-self:start;position:sticky;top:70px;}
+  .osi-detail .dh{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+  .osi-detail .dh .n{font-family:var(--mono);color:var(--sky);font-size:14px;}
+  .osi-detail h4{font-size:20px;}
+  .osi-detail .fn{color:var(--slate);font-size:14.5px;margin:8px 0 14px;}
+  .kv{display:grid;grid-template-columns:96px 1fr;gap:7px 12px;font-size:14px;}
+  .kv dt{font-family:var(--mono);font-size:11.5px;color:var(--slate);padding-top:2px;}
+  .kv dd{margin:0;}
+  .kv .proto{display:inline-block;font-family:var(--mono);font-size:11.5px;background:var(--indigo-soft);
+    color:var(--indigo);padding:2px 8px;border-radius:6px;margin:0 5px 5px 0;}
+  .threat{margin-top:14px;background:var(--coral-soft);border-radius:10px;padding:11px 13px;font-size:13.5px;}
+  .threat b{color:#c02942;}
+
+  /* encapsulation stepper */
+  .encap{margin-top:6px;}
+  .encap-stage{background:var(--ink-panel);border-radius:var(--r);padding:26px 22px;min-height:190px;
+    display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;overflow:hidden;}
+  .pkt{display:flex;align-items:stretch;border-radius:8px;overflow:hidden;font-family:var(--mono);font-size:12px;
+    box-shadow:0 4px 14px rgba(0,0,0,.3);animation:pop .35s ease;}
+  @keyframes pop{from{transform:scale(.85);opacity:0;}to{transform:scale(1);opacity:1;}}
+  .seg{padding:12px 10px;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;white-space:nowrap;}
+  .seg.data{background:#3B82F6;}
+  .seg.h4{background:#8B5CF6;}
+  .seg.h3{background:#0EA5E9;}
+  .seg.h2{background:#10B981;}
+  .seg.t2{background:#10B981;}
+  .seg.bits{background:linear-gradient(90deg,#64748B,#94A3B8);letter-spacing:2px;}
+  .encap-info{display:flex;align-items:center;gap:14px;margin-top:14px;flex-wrap:wrap;}
+  .encap-info .now{font-family:var(--display);font-weight:600;font-size:16px;}
+  .encap-info .now span{color:var(--sky);}
+  .encap-info .desc{color:var(--slate);font-size:14px;flex:1;min-width:220px;}
+  .encap-btns{display:flex;gap:8px;margin-left:auto;}
+  .btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:9px 16px;
+    font-size:14px;cursor:pointer;font-weight:500;color:var(--ink);transition:.15s;}
+  .btn:hover{border-color:var(--indigo);color:var(--indigo);}
+  .btn.primary{background:var(--indigo);color:#fff;border-color:var(--indigo);}
+  .btn.primary:hover{background:#4038c9;color:#fff;}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
+  .steps-dots{display:flex;gap:5px;}
+  .steps-dots i{width:7px;height:7px;border-radius:50%;background:var(--line);}
+  .steps-dots i.on{background:var(--indigo);}
+
+  /* ports table */
+  .ports-bar{display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap;}
+  .search{flex:1;min-width:200px;position:relative;}
+  .search input{width:100%;padding:11px 14px 11px 38px;border:1px solid var(--line);border-radius:11px;font-size:14.5px;
+    font-family:var(--sans);background:var(--surface);outline:none;transition:.15s;}
+  .search input:focus{border-color:var(--indigo);box-shadow:0 0 0 3px var(--indigo-soft);}
+  .search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--slate);}
+  .chk{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;color:var(--slate);cursor:pointer;
+    border:1px solid var(--line);padding:9px 13px;border-radius:11px;user-select:none;}
+  .chk input{accent-color:var(--coral);}
+  .ptbl{width:100%;border-collapse:collapse;font-size:14px;}
+  .ptbl th,.ptbl td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);}
+  .ptbl thead th{font-family:var(--mono);font-size:11.5px;color:var(--slate);font-weight:500;}
+  .ptbl td.port{font-family:var(--mono);font-weight:500;color:var(--indigo);}
+  .ptbl tr.risk td.port{color:var(--coral);}
+  .ptbl .svc{font-weight:600;}
+  .ptbl .note{color:var(--slate);font-size:13px;}
+  .flag{font-family:var(--mono);font-size:10.5px;padding:2px 8px;border-radius:12px;white-space:nowrap;}
+  .flag.safe{background:var(--emerald-soft);color:#0a7a54;}
+  .flag.warn{background:var(--coral-soft);color:#c02942;}
+  .ports-empty{padding:22px;text-align:center;color:var(--slate);font-size:14px;}
+
+  /* CIA cards */
+  .cia{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:6px;}
+  .cia-card{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:20px;cursor:pointer;
+    transition:.18s;border-top:4px solid var(--sky);}
+  .cia-card:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(0,0,0,.06);}
+  .cia-card .l{font-family:var(--display);font-size:34px;font-weight:700;color:var(--sky);line-height:1;}
+  .cia-card h4{font-size:18px;margin:8px 0 6px;}
+  .cia-card>p{font-size:14px;color:var(--slate);margin:0;}
+  .cia-more{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+  .cia-card.open .cia-more{max-height:240px;margin-top:12px;}
+  .cia-more .row{font-size:13px;padding:8px 10px;border-radius:8px;margin-bottom:6px;}
+  .cia-more .attack{background:var(--coral-soft);} .cia-more .attack b{color:#c02942;}
+  .cia-more .ctrl{background:var(--emerald-soft);} .cia-more .ctrl b{color:#0a7a54;}
+  .cia-card .toggle-hint{font-family:var(--mono);font-size:11px;color:var(--sky);margin-top:10px;}
+
+  .props{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0;}
+  .chip{font-size:13px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:7px 14px;cursor:default;}
+  .chip b{color:var(--indigo);}
+
+  .equation{background:var(--ink-panel);color:#eef;border-radius:var(--r);padding:22px;text-align:center;
+    font-family:var(--display);font-size:19px;font-weight:500;margin-top:10px;}
+  .equation .r{color:var(--coral);} .equation .o{color:#7b83a6;margin:0 8px;}
+  .equation .cap{display:block;font-family:var(--sans);font-size:13.5px;color:#a6acc9;margin-top:11px;font-weight:400;}
+
+  /* threats grid */
+  .threats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:6px;}
+  .tcard{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:15px 16px;cursor:pointer;transition:.15s;}
+  .tcard:hover{border-color:var(--coral);background:var(--coral-soft);}
+  .tcard .ic{font-size:20px;}
+  .tcard h4{font-size:15.5px;margin:6px 0 0;}
+  .tcard.open{border-color:var(--coral);}
+  .tcard .body{max-height:0;overflow:hidden;transition:max-height .3s;font-size:13px;color:var(--slate);}
+  .tcard.open .body{max-height:200px;margin-top:8px;}
+  .tcard .body .cia-tag{display:inline-block;font-family:var(--mono);font-size:10.5px;background:var(--indigo-soft);
+    color:var(--indigo);padding:2px 7px;border-radius:6px;margin-top:6px;}
+
+  /* match game */
+  .match{display:grid;grid-template-columns:1fr 1.3fr;gap:14px;margin-top:6px;}
+  .col h4{font-size:13px;font-family:var(--mono);color:var(--slate);font-weight:500;margin-bottom:10px;}
+  .mitem{border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:9px;cursor:pointer;
+    background:var(--surface);font-size:14px;transition:.15s;}
+  .mitem:hover{border-color:var(--indigo);}
+  .mitem.sel{border-color:var(--indigo);background:var(--indigo-soft);}
+  .mitem.done{border-color:var(--emerald);background:var(--emerald-soft);cursor:default;color:#0a7a54;}
+  .mitem.miss{animation:shake .35s;}
+  @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+  .mitem.def{font-size:13.5px;color:var(--slate);}
+  .match-status{font-family:var(--mono);font-size:13px;color:var(--slate);margin-top:6px;}
+  .match-status b{color:var(--emerald);}
+
+  /* quiz */
+  .quizhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:10px;}
+  .score{font-family:var(--mono);font-size:14px;background:var(--indigo-soft);color:var(--indigo);
+    padding:7px 14px;border-radius:20px;font-weight:500;}
+  .q{border-top:1px solid var(--line);padding:18px 0;}
+  .q:first-child{border-top:none;}
+  .qt{font-weight:600;font-size:15.5px;margin-bottom:12px;}
+  .qt .qn{font-family:var(--mono);color:var(--indigo);font-size:13px;margin-right:8px;}
+  .opts{display:grid;gap:8px;}
+  .opt{text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:11px;padding:11px 15px;
+    font-size:14.5px;cursor:pointer;color:var(--ink);transition:.15s;}
+  .opt:hover{border-color:var(--indigo);}
+  .opt.correct{background:var(--emerald-soft);border-color:var(--emerald);}
+  .opt.wrong{background:var(--coral-soft);border-color:var(--coral);}
+  .opt .mk{float:right;font-weight:700;}
+  .exp{margin-top:10px;font-size:13.5px;color:var(--slate);background:var(--canvas);border-radius:9px;
+    padding:10px 13px;display:none;}
+  .exp.show{display:block;} .exp b{color:var(--ink);}
+  .quiz-done{display:none;margin-top:8px;padding:16px;border-radius:12px;background:var(--indigo-soft);
+    text-align:center;font-family:var(--display);font-weight:600;color:var(--indigo);}
+  .quiz-done.show{display:block;}
+
+  footer{max-width:var(--maxw);margin:0 auto;padding:24px 20px 60px;color:var(--slate);font-size:13px;}
+  footer .rule{height:1px;background:var(--line);margin-bottom:14px;}
+
+  @media(max-width:840px){
+    .osi-wrap,.match{grid-template-columns:1fr;}
+    .osi-detail{position:static;}
+    .cia,.threats{grid-template-columns:1fr;}
+    .obj{grid-template-columns:1fr;}
+    .navpills{display:none;}
+    .encap-btns{margin-left:0;}
+  }
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}html{scroll-behavior:auto;}}
+</style>
+</head>
+<body>
+<div class="prog" id="prog"></div>
+
+<nav class="nav">
+  <div class="in">
+    <div class="logo"><b>Network Security</b> <span>// week 01</span></div>
+    <div class="navpills">
+      <a href="#net">Networking</a>
+      <a href="#osi">OSI model</a>
+      <a href="#ports">Ports</a>
+      <a href="#sec">Security</a>
+      <a href="#threats">Threats</a>
+      <a href="#test">Test yourself</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="eyebrow"><i></i> LECTURE 01 · FUNDAMENTALS · INTERACTIVE</div>
+  <h1>Intro to <em>Networks</em> &amp; Security Fundamentals</h1>
+  <p class="sub">Two halves of one idea: first how data actually moves across a network, then how we keep it safe. Click, explore, and test yourself as you go — every widget below is hands-on.</p>
+  <div class="hint"><span class="pulse"></span> Tip: click the layers, cards, and rows — nothing here is just for reading.</div>
+</header>
+
+<main>
+
+  <!-- OBJECTIVES -->
+  <section class="block">
+    <div class="block-head"><span class="tag test">goals</span><h2>What you'll learn</h2></div>
+    <p class="lede">Tap each item as you get it — it's your progress tracker for the session.</p>
+    <div class="card pad">
+      <div class="obj" id="obj">
+        <div class="ob"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span><span class="lbl">How a network moves data (OSI &amp; TCP/IP)</span></div>
+        <div class="ob"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span><span class="lbl">Encapsulation: headers added layer by layer</span></div>
+        <div class="ob"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span><span class="lbl">Common ports &amp; which protocols are risky</span></div>
+        <div class="ob"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span><span class="lbl">The CIA triad and extended properties</span></div>
+        <div class="ob"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span><span class="lbl">Threat vs vulnerability vs exploit vs risk</span></div>
+        <div class="ob"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span><span class="lbl">The most common attack types, and what they hit</span></div>
+      </div>
+      <div class="obj-meter"><b id="objDone">0</b> / 6 marked as understood</div>
+    </div>
+  </section>
+
+  <!-- PART A: NETWORKING -->
+  <section class="block" id="net">
+    <div class="block-head"><span class="tag net">part a · networking</span><h2>How data travels</h2></div>
+    <p class="lede">A network is just devices sharing data over links. To keep the complexity manageable, we split communication into <b>layers</b> — each does one job and hands off to the next. The reference map is the <b>OSI model</b> (7 layers); the model the internet actually runs on is <b>TCP/IP</b> (4 layers).</p>
+
+    <div id="osi">
+      <div class="osi-controls">
+        <div class="toggle" id="osiToggle">
+          <button data-m="osi" class="on">OSI · 7 layers</button>
+          <button data-m="tcp">TCP/IP · 4 layers</button>
+        </div>
+        <span style="font-size:13px;color:var(--slate);align-self:center">← click a layer to inspect it</span>
+      </div>
+      <div class="osi-wrap">
+        <div class="stack" id="stack"></div>
+        <div class="card pad osi-detail" id="osiDetail"></div>
+      </div>
+    </div>
+
+    <h3 class="mini" id="encap-h">Watch a message travel down the stack</h3>
+    <p class="lede">As data moves down the layers to be sent, each layer wraps it in its own header — this is <b>encapsulation</b>. Step through it:</p>
+    <div class="encap">
+      <div class="encap-stage" id="encapStage"></div>
+      <div class="encap-info">
+        <div>
+          <div class="now">Now at: <span id="encapLayer">Application</span></div>
+          <div class="desc" id="encapDesc"></div>
+        </div>
+        <div class="encap-btns">
+          <div class="steps-dots" id="encapDots" style="align-self:center"></div>
+          <button class="btn" id="encapPrev" disabled>← Back</button>
+          <button class="btn primary" id="encapNext">Next →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PORTS -->
+    <h3 class="mini" id="ports">Ports &amp; protocols — search the essentials</h3>
+    <p class="lede">A port is a numbered doorway on a host so one machine can run many services at once. Some default protocols send data in <b>cleartext</b> — a first, easy security lesson. Search or filter:</p>
+    <div class="card pad">
+      <div class="ports-bar">
+        <div class="search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+          <input type="text" id="portSearch" placeholder="Search port, service or protocol… (try 'ssh', '443', 'dns')">
+        </div>
+        <label class="chk"><input type="checkbox" id="riskOnly"> Show insecure only</label>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="ptbl">
+          <thead><tr><th>Port</th><th>Service</th><th>Transport</th><th>Security note</th><th></th></tr></thead>
+          <tbody id="portBody"></tbody>
+        </table>
+      </div>
+      <div class="ports-empty" id="portEmpty" style="display:none">No match — try another term.</div>
+    </div>
+  </section>
+
+  <!-- PART B: SECURITY -->
+  <section class="block" id="sec">
+    <div class="block-head"><span class="tag sec">part b · security</span><h2>Keeping it safe</h2></div>
+    <p class="lede">Now the second half. "Secure" isn't one thing — it's a set of guarantees about information. The classic three are the <b>CIA triad</b>. Click each to see how it breaks and how we protect it.</p>
+
+    <div class="cia" id="cia"></div>
+
+    <p class="lede" style="margin-top:18px">Real systems need more than three. The triad is extended with:</p>
+    <div class="props">
+      <span class="chip"><b>Authentication</b> — proving who you are</span>
+      <span class="chip"><b>Authorization</b> — what you may do</span>
+      <span class="chip"><b>Accounting</b> — logging what was done</span>
+      <span class="chip"><b>Non-repudiation</b> — you can't deny an action</span>
+      <span class="chip"><b>Authenticity</b> — the source is genuine</span>
+    </div>
+
+    <h3 class="mini">The words we use for risk</h3>
+    <p class="lede">These are used loosely in the news and precisely in security. Play the matching game — click a term, then its definition.</p>
+    <div class="card pad">
+      <div class="match">
+        <div class="col"><h4>TERMS</h4><div id="matchTerms"></div></div>
+        <div class="col"><h4>DEFINITIONS</h4><div id="matchDefs"></div></div>
+      </div>
+      <div class="match-status" id="matchStatus">0 / 6 matched — click a term to start</div>
+    </div>
+
+    <div class="equation">
+      <span class="r">Risk</span><span class="o">=</span>Threat<span class="o">×</span>Vulnerability<span class="o">×</span>Impact
+      <span class="cap">You rarely remove threats — so defense focuses on shrinking vulnerabilities and limiting impact.</span>
+    </div>
+  </section>
+
+  <!-- THREATS -->
+  <section class="block" id="threats">
+    <div class="block-head"><span class="tag sec">part b · threats</span><h2>Common attacks at a glance</h2></div>
+    <p class="lede">A first tour of the attacks you'll study in depth later. Click a card to expand — note which CIA property each one targets.</p>
+    <div class="threats" id="threatGrid"></div>
+  </section>
+
+  <!-- TEST -->
+  <section class="block" id="test">
+    <div class="block-head"><span class="tag test">check</span><h2>Test yourself</h2></div>
+    <p class="lede">Mix of networking and security. Pick an answer to reveal whether it's right and why.</p>
+    <div class="card pad">
+      <div class="quizhead">
+        <div style="font-family:var(--display);font-weight:600">Quick quiz</div>
+        <div class="score" id="score">Score: 0 / 0</div>
+      </div>
+      <div id="quiz"></div>
+      <div class="quiz-done" id="quizDone"></div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="rule"></div>
+  Network Security · Week 1 — Intro to Networks &amp; Security Fundamentals · interactive lesson. Everything runs in the browser; no data leaves this page.
+</footer>
+
+<script>
+/* ---------------- OSI / TCP-IP explorer ---------------- */
+const LAYERS = [
+  {n:7,name:"Application",pdu:"Data",tcp:"Application",fn:"Where users and apps interact with the network — the services people actually use.",protos:["HTTP","HTTPS","DNS","FTP","SMTP"],devices:"Hosts, gateways, proxies",threat:"Phishing, malicious payloads, and application exploits (e.g. injection) all arrive here."},
+  {n:6,name:"Presentation",pdu:"Data",tcp:"Application",fn:"Translates, encrypts, and compresses data so both sides understand it.",protos:["TLS/SSL","JPEG","ASCII","MIME"],devices:"Handled in software",threat:"Weak or stripped encryption (SSL stripping) exposes data that should be private."},
+  {n:5,name:"Session",pdu:"Data",tcp:"Application",fn:"Opens, manages and closes the conversation (session) between two hosts.",protos:["NetBIOS","RPC","Sockets"],devices:"Handled in software",threat:"Session hijacking — stealing a valid session token to impersonate a user."},
+  {n:4,name:"Transport",pdu:"Segment",tcp:"Transport",fn:"Reliable, ordered delivery and the ports that separate one service from another.",protos:["TCP","UDP"],devices:"Firewalls (L4)",threat:"SYN floods (DoS) and port scanning to map open services."},
+  {n:3,name:"Network",pdu:"Packet",tcp:"Internet",fn:"Logical addressing (IP) and routing packets across different networks.",protos:["IP","ICMP","IPsec"],devices:"Routers, L3 switches",threat:"IP spoofing and man-in-the-middle via routing manipulation."},
+  {n:2,name:"Data Link",pdu:"Frame",tcp:"Network Access",fn:"Moves frames on the local link using physical (MAC) addresses.",protos:["Ethernet","ARP","MAC","Wi-Fi"],devices:"Switches, NICs",threat:"ARP spoofing and MAC flooding to intercept local traffic."},
+  {n:1,name:"Physical",pdu:"Bits",tcp:"Network Access",fn:"The raw transmission of bits over cable, fibre or radio.",protos:["Cables","Hubs","Radio"],devices:"Cables, hubs, repeaters",threat:"Wiretapping, cable tampering, and wireless jamming."}
+];
+const TCP_COLOR={ "Application":"#4F46E5","Transport":"#8B5CF6","Internet":"#0EA5E9","Network Access":"#10B981" };
+let osiMode="osi", activeLayer=7;
+const stackEl=document.getElementById("stack");
+const detailEl=document.getElementById("osiDetail");
+
+function renderStack(){
+  stackEl.innerHTML="";
+  LAYERS.forEach(L=>{
+    const d=document.createElement("div");
+    d.className="layer"+(L.n===activeLayer?" active":"");
+    let band="";
+    if(osiMode==="tcp"){ band=`<span class="tcpband" style="background:${TCP_COLOR[L.tcp]}"></span>`; }
+    d.innerHTML=`${band}<span class="no">L${L.n}</span><span class="nm">${L.name}</span><span class="pdu">${osiMode==="tcp"?L.tcp:L.pdu}</span>`;
+    d.onclick=()=>{activeLayer=L.n;renderStack();renderDetail();};
+    stackEl.appendChild(d);
+  });
+}
+function renderDetail(){
+  const L=LAYERS.find(x=>x.n===activeLayer);
+  detailEl.innerHTML=`
+    <div class="dh"><span class="n">Layer ${L.n}</span><h4>${L.name}</h4></div>
+    <p class="fn">${L.fn}</p>
+    <dl class="kv">
+      <dt>PDU</dt><dd>${L.pdu}</dd>
+      <dt>Protocols</dt><dd>${L.protos.map(p=>`<span class="proto">${p}</span>`).join("")}</dd>
+      <dt>Devices</dt><dd>${L.devices}</dd>
+      <dt>TCP/IP</dt><dd>${L.tcp} layer</dd>
+    </dl>
+    <div class="threat"><b>Security risk here:</b> ${L.threat}</div>`;
+}
+document.querySelectorAll("#osiToggle button").forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll("#osiToggle button").forEach(x=>x.classList.remove("on"));
+    b.classList.add("on"); osiMode=b.dataset.m; renderStack();
+  };
+});
+renderStack(); renderDetail();
+
+/* ---------------- Encapsulation stepper ---------------- */
+const ENCAP=[
+  {layer:"Application",desc:"You type a message. At the top layers it is just raw data.",segs:[["data","Data"]]},
+  {layer:"Transport",desc:"TCP adds a header with source & destination ports. Data is now a segment.",segs:[["h4","TCP"],["data","Data"]]},
+  {layer:"Network",desc:"IP adds a header with source & destination IP addresses. Now a packet.",segs:[["h3","IP"],["h4","TCP"],["data","Data"]]},
+  {layer:"Data Link",desc:"A frame header (MAC) and trailer are added for the local link. Now a frame.",segs:[["h2","MAC"],["h3","IP"],["h4","TCP"],["data","Data"],["t2","FCS"]]},
+  {layer:"Physical",desc:"The whole frame becomes a stream of bits sent over the wire or air.",segs:[["bits","1 0 1 1 0 0 1 0 1 1 0 0 1 0 1"]]}
+];
+let estep=0;
+const stage=document.getElementById("encapStage");
+const eLayer=document.getElementById("encapLayer");
+const eDesc=document.getElementById("encapDesc");
+const eDots=document.getElementById("encapDots");
+const ePrev=document.getElementById("encapPrev");
+const eNext=document.getElementById("encapNext");
+ENCAP.forEach((_,i)=>{const i2=document.createElement("i");if(i===0)i2.className="on";eDots.appendChild(i2);});
+function renderEncap(){
+  const s=ENCAP[estep];
+  const pkt=document.createElement("div"); pkt.className="pkt";
+  s.segs.forEach(([cls,txt])=>{const sg=document.createElement("div");sg.className="seg "+cls;sg.textContent=txt;pkt.appendChild(sg);});
+  stage.innerHTML=""; stage.appendChild(pkt);
+  eLayer.textContent=s.layer; eDesc.textContent=s.desc;
+  ePrev.disabled=estep===0; eNext.disabled=estep===ENCAP.length-1;
+  eNext.textContent=estep===ENCAP.length-1?"Sent ✓":"Next →";
+  [...eDots.children].forEach((d,i)=>d.className=i<=estep?"on":"");
+}
+eNext.onclick=()=>{if(estep<ENCAP.length-1){estep++;renderEncap();}};
+ePrev.onclick=()=>{if(estep>0){estep--;renderEncap();}};
+renderEncap();
+
+/* ---------------- Ports table ---------------- */
+const PORTS=[
+  {p:"20/21",s:"FTP",t:"TCP",risk:true,note:"File transfer — sends credentials & data in cleartext. Prefer SFTP/FTPS."},
+  {p:"22",s:"SSH",t:"TCP",risk:false,note:"Encrypted remote login & tunneling. The secure default for admin access."},
+  {p:"23",s:"Telnet",t:"TCP",risk:true,note:"Remote login in full cleartext. Effectively obsolete — never use."},
+  {p:"25",s:"SMTP",t:"TCP",risk:true,note:"Email sending; unencrypted unless STARTTLS/SMTPS is enforced."},
+  {p:"53",s:"DNS",t:"TCP/UDP",risk:true,note:"Name resolution. Classic target for spoofing/poisoning; consider DNSSEC/DoH."},
+  {p:"67/68",s:"DHCP",t:"UDP",risk:true,note:"Auto IP assignment. Rogue DHCP servers can redirect traffic."},
+  {p:"80",s:"HTTP",t:"TCP",risk:true,note:"Web traffic in cleartext — readable & modifiable in transit. Use HTTPS."},
+  {p:"110",s:"POP3",t:"TCP",risk:true,note:"Mail retrieval; cleartext unless secured (POP3S/995)."},
+  {p:"143",s:"IMAP",t:"TCP",risk:true,note:"Mail access; cleartext unless secured (IMAPS/993)."},
+  {p:"161",s:"SNMP",t:"UDP",risk:true,note:"Device management; v1/v2c use weak community strings. Use SNMPv3."},
+  {p:"389",s:"LDAP",t:"TCP",risk:true,note:"Directory lookups; cleartext unless LDAPS (636)."},
+  {p:"443",s:"HTTPS",t:"TCP",risk:false,note:"Web traffic encrypted with TLS. The secure web default."},
+  {p:"445",s:"SMB",t:"TCP",risk:true,note:"Windows file sharing. Heavily targeted (e.g. WannaCry). Keep off the internet."},
+  {p:"3306",s:"MySQL",t:"TCP",risk:true,note:"Database. Should never be exposed publicly; restrict by firewall."},
+  {p:"3389",s:"RDP",t:"TCP",risk:true,note:"Windows remote desktop — a top ransomware entry point when exposed."}
+];
+const portBody=document.getElementById("portBody");
+const portEmpty=document.getElementById("portEmpty");
+const portSearch=document.getElementById("portSearch");
+const riskOnly=document.getElementById("riskOnly");
+function renderPorts(){
+  const q=portSearch.value.trim().toLowerCase();
+  const only=riskOnly.checked;
+  const rows=PORTS.filter(x=>{
+    if(only && !x.risk) return false;
+    if(!q) return true;
+    return (x.p+" "+x.s+" "+x.t+" "+x.note).toLowerCase().includes(q);
+  });
+  portBody.innerHTML="";
+  rows.forEach(x=>{
+    const tr=document.createElement("tr"); if(x.risk)tr.className="risk";
+    tr.innerHTML=`<td class="port">${x.p}</td><td class="svc">${x.s}</td><td class="note">${x.t}</td>
+      <td class="note">${x.note}</td>
+      <td><span class="flag ${x.risk?"warn":"safe"}">${x.risk?"insecure":"secure"}</span></td>`;
+    portBody.appendChild(tr);
+  });
+  portEmpty.style.display=rows.length?"none":"block";
+}
+portSearch.oninput=renderPorts; riskOnly.onchange=renderPorts;
+renderPorts();
+
+/* ---------------- CIA cards ---------------- */
+const CIA=[
+  {l:"C",name:"Confidentiality",p:"Only authorized parties can read the data.",attack:"Eavesdropping, data theft, misconfigured access.",ctrl:"Encryption, access control, segmentation."},
+  {l:"I",name:"Integrity",p:"Data is accurate and any change is detectable.",attack:"Tampering, injection, man-in-the-middle.",ctrl:"Hashing, digital signatures, MACs."},
+  {l:"A",name:"Availability",p:"Systems are reachable when legitimately needed.",attack:"DoS / DDoS, ransomware, outages.",ctrl:"Redundancy, backups, rate limiting."}
+];
+const ciaEl=document.getElementById("cia");
+CIA.forEach(c=>{
+  const d=document.createElement("div"); d.className="cia-card";
+  d.innerHTML=`<div class="l">${c.l}</div><h4>${c.name}</h4><p>${c.p}</p>
+    <div class="cia-more">
+      <div class="row attack"><b>Attacked by:</b> ${c.attack}</div>
+      <div class="row ctrl"><b>Protected by:</b> ${c.ctrl}</div>
+    </div><div class="toggle-hint">click to expand ↓</div>`;
+  d.onclick=()=>d.classList.toggle("open");
+  ciaEl.appendChild(d);
+});
+
+/* ---------------- Match game ---------------- */
+const PAIRS=[
+  {t:"Asset",d:"Anything of value you protect — data, a server, a reputation."},
+  {t:"Threat",d:"A potential cause of harm to an asset."},
+  {t:"Vulnerability",d:"A weakness a threat can use — an unpatched service, a weak password."},
+  {t:"Exploit",d:"The specific technique or code that turns a vulnerability into a compromise."},
+  {t:"Attack surface",d:"The sum of all points where an attacker could try to get in."},
+  {t:"Risk",d:"The likelihood of a threat exploiting a vulnerability, plus the impact."}
+];
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+const termsEl=document.getElementById("matchTerms");
+const defsEl=document.getElementById("matchDefs");
+const matchStatus=document.getElementById("matchStatus");
+let selTerm=null, matched=0;
+shuffle(PAIRS).forEach(pr=>{
+  const el=document.createElement("div"); el.className="mitem"; el.textContent=pr.t; el.dataset.k=pr.t;
+  el.onclick=()=>{ if(el.classList.contains("done"))return;
+    document.querySelectorAll("#matchTerms .mitem").forEach(x=>x.classList.remove("sel"));
+    el.classList.add("sel"); selTerm=pr.t; };
+  termsEl.appendChild(el);
+});
+shuffle(PAIRS).forEach(pr=>{
+  const el=document.createElement("div"); el.className="mitem def"; el.textContent=pr.d; el.dataset.k=pr.t;
+  el.onclick=()=>{ if(!selTerm||el.classList.contains("done"))return;
+    if(selTerm===pr.t){
+      el.classList.add("done");
+      const tEl=[...termsEl.children].find(x=>x.dataset.k===pr.t);
+      tEl.classList.remove("sel"); tEl.classList.add("done");
+      selTerm=null; matched++;
+      matchStatus.innerHTML = matched===PAIRS.length ? "<b>All 6 matched — nice work! ✓</b>" : matched+" / 6 matched — keep going";
+    } else {
+      el.classList.add("miss"); setTimeout(()=>el.classList.remove("miss"),350);
+    }
+  };
+  defsEl.appendChild(el);
+});
+
+/* ---------------- Threats grid ---------------- */
+const THREATS=[
+  {ic:"🪱",n:"Malware",b:"Malicious software — viruses, worms, trojans, spyware — that runs without consent.",cia:"All three"},
+  {ic:"🎣",n:"Phishing",b:"Tricking a person into revealing credentials or running a payload, usually via email.",cia:"Confidentiality"},
+  {ic:"🔒",n:"Ransomware",b:"Encrypts your files and demands payment; often also steals data to double-extort.",cia:"Availability"},
+  {ic:"🕵️",n:"Man-in-the-Middle",b:"Attacker secretly relays/alters traffic between two parties who think they talk directly.",cia:"Confidentiality + Integrity"},
+  {ic:"🌊",n:"DoS / DDoS",b:"Floods a service with traffic so legitimate users can't reach it.",cia:"Availability"},
+  {ic:"💉",n:"Injection",b:"Feeding crafted input (e.g. SQL) so an app runs attacker commands.",cia:"Integrity + Confidentiality"},
+  {ic:"🔑",n:"Password attack",b:"Guessing or cracking credentials — brute force, dictionary, credential stuffing.",cia:"Confidentiality"},
+  {ic:"👤",n:"Insider threat",b:"Someone with legitimate access misuses it — maliciously or by accident.",cia:"All three"},
+  {ic:"⏱️",n:"Zero-day",b:"An attack using a flaw with no patch yet — defenders have had 'zero days' to fix it.",cia:"All three"}
+];
+const tg=document.getElementById("threatGrid");
+THREATS.forEach(t=>{
+  const d=document.createElement("div"); d.className="tcard";
+  d.innerHTML=`<div class="ic">${t.ic}</div><h4>${t.n}</h4>
+    <div class="body">${t.b}<br><span class="cia-tag">Targets: ${t.cia}</span></div>`;
+  d.onclick=()=>d.classList.toggle("open");
+  tg.appendChild(d);
+});
+
+/* ---------------- Quiz ---------------- */
+const QUIZ=[
+  {q:"Which OSI layer uses IP addresses to route packets between networks?",o:["Data Link (2)","Network (3)","Transport (4)"],c:1,e:"Layer 3, the Network layer, handles logical (IP) addressing and routing. MAC addresses live at Layer 2."},
+  {q:"HTTP (port 80) sends data in cleartext. What's the secure alternative?",o:["Telnet","HTTPS (443)","FTP"],c:1,e:"HTTPS wraps HTTP in TLS, encrypting the traffic. Telnet and FTP are themselves cleartext."},
+  {q:"An attacker encrypts a hospital's files so staff can't open them. Which CIA property is hit first?",o:["Confidentiality","Integrity","Availability"],c:2,e:"Availability — the data is unreachable. If it's also stolen and leaked, confidentiality is hit too (double extortion)."},
+  {q:"An unpatched server is the flaw; a phishing email is the way in. Which is the vulnerability?",o:["The phishing email","The unpatched server","The attacker"],c:1,e:"The unpatched server is the weakness (vulnerability). The phishing email is the vector — the route taken."},
+  {q:"Adding a TCP header, then an IP header, then a frame header as data goes down the stack is called…",o:["Encapsulation","Encryption","Routing"],c:0,e:"Encapsulation — each layer wraps the data in its own header before handing it down."},
+  {q:"Which is the strongest reason least privilege matters?",o:["It speeds up the network","It limits the damage when an account is compromised","It encrypts data"],c:1,e:"Least privilege shrinks the blast radius — a compromised account can only reach what it truly needed."}
+];
+const quizEl=document.getElementById("quiz");
+const scoreEl=document.getElementById("score");
+const quizDone=document.getElementById("quizDone");
+let answered=0, correct=0;
+QUIZ.forEach((Q,i)=>{
+  const q=document.createElement("div"); q.className="q";
+  const opts=Q.o.map((o,j)=>`<button class="opt" data-j="${j}">${o}</button>`).join("");
+  q.innerHTML=`<div class="qt"><span class="qn">Q${i+1}</span>${Q.q}</div><div class="opts">${opts}</div><div class="exp"></div>`;
+  const exp=q.querySelector(".exp");
+  q.querySelectorAll(".opt").forEach(btn=>{
+    btn.onclick=()=>{
+      if(q.dataset.done)return; q.dataset.done="1"; answered++;
+      const j=+btn.dataset.j; const opts=q.querySelectorAll(".opt");
+      opts[Q.c].classList.add("correct"); opts[Q.c].insertAdjacentHTML("beforeend",'<span class="mk">✓</span>');
+      if(j===Q.c){correct++;} else {btn.classList.add("wrong"); btn.insertAdjacentHTML("beforeend",'<span class="mk">✗</span>');}
+      exp.innerHTML="<b>"+(j===Q.c?"Correct. ":"Not quite. ")+"</b>"+Q.e; exp.classList.add("show");
+      scoreEl.textContent=`Score: ${correct} / ${answered}`;
+      if(answered===QUIZ.length){
+        const pct=Math.round(correct/QUIZ.length*100);
+        quizDone.textContent=`You scored ${correct} / ${QUIZ.length} (${pct}%) — ${pct>=80?"strong start!":pct>=50?"solid, review the misses.":"revisit the sections above and try again."}`;
+        quizDone.classList.add("show");
+      }
+    };
+  });
+  quizEl.appendChild(q);
+});
+
+/* ---------------- Objectives checklist + progress bar ---------------- */
+const objDone=document.getElementById("objDone");
+let done=0;
+document.querySelectorAll("#obj .ob").forEach(ob=>{
+  ob.onclick=()=>{ ob.classList.toggle("done");
+    done=document.querySelectorAll("#obj .ob.done").length; objDone.textContent=done; };
+});
+const prog=document.getElementById("prog");
+window.addEventListener("scroll",()=>{
+  const h=document.documentElement.scrollHeight-window.innerHeight;
+  prog.style.width=(window.scrollY/h*100)+"%";
+});
+</script>
+</body>
+</html>

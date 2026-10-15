@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How DNS Works</title>
+<style>
+  :root{
+    --bg:#0f1420; --panel:#171d2e; --panel2:#1d2438; --border:#2a3350;
+    --text:#e7ecf6; --muted:#9aa6c4; --accent:#5b9dff; --accent2:#38d39f;
+    --warn:#ff7a7a; --warn-bg:#2a1a22; --ok:#38d39f; --ok-bg:#132a24;
+    --code:#0b0f18; --chip:#233152; --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6; font-size:16px;
+  }
+  .wrap{max-width:960px; margin:0 auto; padding:16px}
+  header.top{
+    padding:48px 16px 32px; text-align:center;
+    border-bottom:1px solid var(--border);
+    background:radial-gradient(1200px 400px at 50% -50%, rgba(91,157,255,.18), transparent);
+  }
+  header.top h1{font-size:2.1rem; margin:0 0 8px; letter-spacing:-.5px}
+  header.top p{color:var(--muted); margin:0; max-width:640px; margin-inline:auto}
+  nav.toc{
+    display:flex; flex-wrap:wrap; gap:8px; justify-content:center;
+    padding:18px 16px; border-bottom:1px solid var(--border);
+    position:sticky; top:0; background:rgba(15,20,32,.92); backdrop-filter:blur(8px); z-index:10;
+  }
+  nav.toc a{
+    color:var(--muted); text-decoration:none; font-size:.85rem; font-weight:500;
+    padding:6px 12px; border:1px solid var(--border); border-radius:999px; white-space:nowrap;
+    transition:.15s;
+  }
+  nav.toc a:hover{color:var(--text); border-color:var(--accent); background:var(--chip)}
+  section{padding:36px 0 8px; border-bottom:1px solid var(--border)}
+  section:last-child{border-bottom:none}
+  h2{font-size:1.5rem; margin:0 0 4px; display:flex; align-items:center; gap:10px}
+  h2 .num{
+    font-size:.85rem; color:var(--accent); background:var(--chip);
+    border:1px solid var(--border); border-radius:8px; padding:2px 9px; font-family:var(--mono);
+  }
+  h3{font-size:1.12rem; margin:26px 0 8px; color:var(--text)}
+  p{margin:10px 0}
+  .lead{color:var(--muted)}
+  .card{
+    background:var(--panel); border:1px solid var(--border); border-radius:14px;
+    padding:18px 20px; margin:16px 0;
+  }
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+  @media(max-width:680px){.grid{grid-template-columns:1fr}}
+  code{
+    font-family:var(--mono); font-size:.86em; background:var(--code);
+    border:1px solid var(--border); padding:1px 6px; border-radius:6px; color:#cfe0ff;
+  }
+  pre{
+    background:var(--code); border:1px solid var(--border); border-radius:12px;
+    padding:14px 16px; overflow-x:auto; font-family:var(--mono); font-size:.82rem;
+    color:#cfe0ff; line-height:1.55;
+  }
+  pre .c{color:#6b7ba3}
+  pre .k{color:#5b9dff}
+  pre .g{color:#38d39f}
+  pre .y{color:#e6c07b}
+  table{width:100%; border-collapse:collapse; margin:14px 0; font-size:.9rem}
+  th,td{text-align:left; padding:10px 12px; border-bottom:1px solid var(--border); vertical-align:top}
+  th{color:var(--accent); font-weight:600; font-size:.82rem; text-transform:uppercase; letter-spacing:.4px}
+  td code{white-space:nowrap}
+  tbody tr:hover{background:var(--panel2)}
+  .flow{
+    display:flex; flex-direction:column; gap:0; margin:18px 0; counter-reset:step;
+  }
+  .step{
+    display:flex; gap:14px; align-items:flex-start; padding:12px 0; position:relative;
+  }
+  .step .dot{
+    flex:none; width:30px; height:30px; border-radius:50%; background:var(--chip);
+    border:1px solid var(--accent); color:var(--accent); font-weight:700;
+    display:flex; align-items:center; justify-content:center; font-size:.85rem; font-family:var(--mono);
+  }
+  .step:not(:last-child)::after{
+    content:""; position:absolute; left:15px; top:42px; bottom:-12px; width:1px; background:var(--border);
+  }
+  .step .body{padding-top:3px}
+  .step .body b{color:var(--text)}
+  .step .body span{color:var(--muted); font-size:.92rem}
+  .tag{
+    display:inline-block; font-size:.72rem; font-family:var(--mono); padding:2px 8px;
+    border-radius:6px; margin-right:6px; border:1px solid var(--border);
+  }
+  .tag.udp{color:#7ee0c0; background:rgba(56,211,159,.1); border-color:rgba(56,211,159,.35)}
+  .tag.tcp{color:#89b8ff; background:rgba(91,157,255,.1); border-color:rgba(91,157,255,.35)}
+  .attack{border-left:3px solid var(--warn); background:var(--warn-bg)}
+  .attack h3{color:var(--warn); margin-top:0}
+  .defense{border-left:3px solid var(--ok); background:var(--ok-bg)}
+  .defense h3{color:var(--ok); margin-top:0}
+  .kv{display:flex; gap:8px; margin:6px 0; font-size:.9rem}
+  .kv b{flex:none; width:110px; color:var(--muted); font-weight:500}
+  .callout{
+    background:var(--panel2); border:1px solid var(--border); border-left:3px solid var(--accent);
+    border-radius:10px; padding:12px 16px; margin:14px 0; font-size:.92rem;
+  }
+  .callout b{color:var(--accent)}
+  footer{padding:30px 16px 50px; text-align:center; color:var(--muted); font-size:.85rem}
+  .pill-row{display:flex; flex-wrap:wrap; gap:6px; margin:8px 0}
+  .pill{font-size:.78rem; padding:3px 10px; border-radius:999px; background:var(--chip); border:1px solid var(--border); color:var(--muted)}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>How DNS Works</h1>
+  <p>The Domain Name System — resolution flow, UDP vs TCP transport, resource records, common attacks, and the mechanisms that defend it.</p>
+</header>
+
+<nav class="toc">
+  <a href="#basics">1 · Basics</a>
+  <a href="#resolution">2 · Resolution</a>
+  <a href="#transport">3 · UDP &amp; TCP</a>
+  <a href="#records">4 · Records</a>
+  <a href="#attacks">5 · Attacks</a>
+  <a href="#security">6 · Security</a>
+</nav>
+
+<div class="wrap">
+
+  <!-- 1 -->
+  <section id="basics">
+    <h2><span class="num">01</span> What DNS Is</h2>
+    <p class="lead">DNS is the internet's distributed directory. It translates human-readable names like <code>www.example.com</code> into IP addresses like <code>93.184.216.34</code> (and back), so machines can route traffic while people use names.</p>
+
+    <div class="grid">
+      <div class="card">
+        <h3 style="margin-top:0">The name hierarchy</h3>
+        <p>Names are read right-to-left, from most general to most specific. A trailing dot marks the root.</p>
+        <pre><span class="c"># www.example.com.</span>
+.              <span class="c">→ root</span>
+com.           <span class="c">→ TLD</span>
+example.com.   <span class="c">→ authoritative zone</span>
+www.example.com. <span class="c">→ host / FQDN</span></pre>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">The four players</h3>
+        <div class="kv"><b>Stub resolver</b><span>The client OS library that asks the question.</span></div>
+        <div class="kv"><b>Recursive</b><span>The resolver that does the legwork and caches answers.</span></div>
+        <div class="kv"><b>Root / TLD</b><span>Referral servers that point toward the right zone.</span></div>
+        <div class="kv"><b>Authoritative</b><span>Holds the real records for a zone.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section id="resolution">
+    <h2><span class="num">02</span> The Resolution Flow</h2>
+    <p class="lead">A recursive resolver walks the hierarchy on the client's behalf. Each server either answers or refers it one step closer. Answers are cached along the way, honoring each record's TTL.</p>
+
+    <div class="card">
+      <div class="flow">
+        <div class="step"><div class="dot">1</div><div class="body"><b>Client → Recursive resolver</b><br><span>"What is the A record for www.example.com?" The stub resolver sends a recursive query.</span></div></div>
+        <div class="step"><div class="dot">2</div><div class="body"><b>Resolver → Root server</b><br><span>Root doesn't know the answer but refers: "ask the <code>.com</code> TLD servers."</span></div></div>
+        <div class="step"><div class="dot">3</div><div class="body"><b>Resolver → TLD server (.com)</b><br><span>TLD refers: "ask the authoritative name servers for example.com" (NS + glue records).</span></div></div>
+        <div class="step"><div class="dot">4</div><div class="body"><b>Resolver → Authoritative server</b><br><span>Returns the authoritative answer: <code>www.example.com A 93.184.216.34</code>.</span></div></div>
+        <div class="step"><div class="dot">5</div><div class="body"><b>Resolver → Client</b><br><span>Resolver caches the record for its TTL and returns the answer to the stub resolver.</span></div></div>
+      </div>
+      <div class="callout"><b>Recursive vs iterative:</b> the client's query is <em>recursive</em> ("get me the final answer"). The resolver's queries to root/TLD/authoritative are <em>iterative</em> ("give me your best referral"). Caching is what keeps step 2–4 from happening on every lookup.</div>
+    </div>
+
+    <h3>Message anatomy</h3>
+    <p>Every DNS message — query or response — shares one 12-byte header followed by four sections.</p>
+    <pre><span class="c"># DNS header (12 bytes)</span>
+<span class="k">ID</span>        16-bit transaction ID  <span class="c">← must match in the reply</span>
+<span class="k">Flags</span>     QR, Opcode, AA, TC, RD, RA, <span class="y">RCODE</span>
+<span class="k">QDCOUNT</span>   # questions
+<span class="k">ANCOUNT</span>   # answer RRs
+<span class="k">NSCOUNT</span>   # authority RRs
+<span class="k">ARCOUNT</span>   # additional RRs
+<span class="c"># Sections: Question | Answer | Authority | Additional</span></pre>
+    <p><span class="tag udp">TC</span> The <b>TC</b> (truncation) flag is the hinge between transport modes — see the next section.</p>
+  </section>
+
+  <!-- 3 -->
+  <section id="transport">
+    <h2><span class="num">03</span> DNS over UDP and TCP</h2>
+    <p class="lead">DNS uses port <b>53</b> on both UDP and TCP. UDP is the default because it's fast and connectionless; TCP is the fallback when a single datagram isn't enough or reliability is required.</p>
+
+    <table>
+      <thead><tr><th>Aspect</th><th>UDP (default)</th><th>TCP (fallback)</th></tr></thead>
+      <tbody>
+        <tr><td>Setup cost</td><td>None — one packet out, one back</td><td>3-way handshake first</td></tr>
+        <tr><td>Speed</td><td>Low latency, ideal for small queries</td><td>Higher latency</td></tr>
+        <tr><td>Reliability</td><td>No delivery guarantee</td><td>Ordered, acknowledged delivery</td></tr>
+        <tr><td>Size limit</td><td>512 B classic; larger via EDNS0</td><td>Effectively unbounded (2-byte length prefix)</td></tr>
+        <tr><td>Spoofing risk</td><td>Higher — easy to forge source</td><td>Lower — handshake resists blind spoofing</td></tr>
+      </tbody>
+    </table>
+
+    <h3>When DNS switches to TCP</h3>
+    <div class="card">
+      <div class="kv"><b><span class="tag udp">1</span></b><span><b>Truncation.</b> If a UDP response exceeds the client's buffer, the server sets the <code>TC</code> flag. The client retries the same query over TCP to get the full answer.</span></div>
+      <div class="kv"><b><span class="tag tcp">2</span></b><span><b>Zone transfers.</b> <code>AXFR</code> (full) and <code>IXFR</code> (incremental) between authoritative servers always use TCP — the payload is large and must be reliable.</span></div>
+      <div class="kv"><b><span class="tag tcp">3</span></b><span><b>Large responses.</b> DNSSEC signatures, big RRSETs, and many-record answers routinely exceed UDP limits.</span></div>
+    </div>
+
+    <h3>EDNS0 — extending UDP</h3>
+    <p>Classic DNS capped UDP payloads at 512 bytes. <b>EDNS0</b> (via an <code>OPT</code> pseudo-record) lets a client advertise a larger buffer, commonly 1232–4096 bytes, so big responses can still ride UDP and avoid the TCP round-trip. Oversized EDNS buffers also enable amplification attacks — noted in section 5.</p>
+
+    <div class="callout"><b>Encrypted transports:</b> plain DNS on port 53 is cleartext. <b>DoT</b> (DNS over TLS, port 853) and <b>DoH</b> (DNS over HTTPS, port 443) wrap queries in TLS for confidentiality. <b>DoQ</b> (DNS over QUIC) does the same over UDP/QUIC. These protect privacy on the wire but are distinct from DNSSEC, which protects <em>integrity</em>.</p></div>
+  </section>
+
+  <!-- 4 -->
+  <section id="records">
+    <h2><span class="num">04</span> Resource Records</h2>
+    <p class="lead">A zone is a set of resource records (RRs). Each has a name, TTL, class (almost always <code>IN</code>), type, and type-specific data.</p>
+
+    <table>
+      <thead><tr><th>Type</th><th>Purpose</th><th>Example RDATA</th></tr></thead>
+      <tbody>
+        <tr><td><code>A</code></td><td>Name → IPv4 address</td><td><code>93.184.216.34</code></td></tr>
+        <tr><td><code>AAAA</code></td><td>Name → IPv6 address</td><td><code>2606:2800:220:1:...</code></td></tr>
+        <tr><td><code>CNAME</code></td><td>Alias to another name</td><td><code>www → example.com.</code></td></tr>
+        <tr><td><code>MX</code></td><td>Mail exchanger + priority</td><td><code>10 mail.example.com.</code></td></tr>
+        <tr><td><code>NS</code></td><td>Delegates a zone to name servers</td><td><code>ns1.example.com.</code></td></tr>
+        <tr><td><code>SOA</code></td><td>Zone authority + serial/timers</td><td><code>ns1 admin 2026092301 ...</code></td></tr>
+        <tr><td><code>TXT</code></td><td>Arbitrary text (SPF, DKIM, verification)</td><td><code>"v=spf1 include:_spf..."</code></td></tr>
+        <tr><td><code>PTR</code></td><td>Reverse: IP → name</td><td><code>34.216...in-addr.arpa</code></td></tr>
+        <tr><td><code>SRV</code></td><td>Service location (host + port)</td><td><code>_sip._tcp 10 5 5060 ...</code></td></tr>
+        <tr><td><code>CAA</code></td><td>Which CAs may issue certs</td><td><code>0 issue "letsencrypt.org"</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>DNSSEC record types</h3>
+    <div class="pill-row">
+      <span class="pill">RRSIG — signature over an RRset</span>
+      <span class="pill">DNSKEY — zone public keys</span>
+      <span class="pill">DS — hash of child DNSKEY (chain of trust)</span>
+      <span class="pill">NSEC / NSEC3 — authenticated denial of existence</span>
+    </div>
+
+    <pre><span class="c"># A real query with dig</span>
+$ dig +norecurse @a.gtld-servers.net example.com A
+$ dig example.com MX +short
+$ dig +dnssec example.com          <span class="c"># show RRSIG</span>
+$ dig +trace example.com           <span class="c"># walk root → TLD → auth</span></pre>
+  </section>
+
+  <!-- 5 -->
+  <section id="attacks">
+    <h2><span class="num">05</span> DNS Attacks</h2>
+    <p class="lead">DNS is trusted by everything and, in its classic form, authenticates nothing. That makes it a rich target for spoofing, redirection, denial-of-service, and covert channels.</p>
+
+    <div class="card attack">
+      <h3>Cache poisoning / spoofing</h3>
+      <p>An attacker races to inject a forged response into a recursive resolver's cache. If the fake reply matches the query's transaction ID, source port, and question before the real answer arrives, the resolver caches the malicious record and serves it to every client until TTL expiry.</p>
+    </div>
+
+    <div class="card attack">
+      <h3>Kaminsky attack</h3>
+      <p>A 2008 refinement of cache poisoning. By querying random non-existent subdomains and forging referrals for the parent zone's NS records, the attacker gets unlimited retries and can hijack an entire domain rather than a single hostname. It's why <b>source-port randomization</b> became mandatory.</p>
+    </div>
+
+    <div class="card attack">
+      <h3>DNS amplification (DDoS)</h3>
+      <p>A reflection attack: the attacker spoofs the victim's IP as the source of small queries to open resolvers, which return much larger responses (EDNS0, <code>ANY</code>, DNSSEC). A tiny request yields a large reply aimed at the victim — amplification factors of 50× or more.</p>
+    </div>
+
+    <div class="card attack">
+      <h3>DNS tunneling</h3>
+      <p>Data is smuggled inside DNS queries/responses (encoded in subdomain labels or TXT records) to exfiltrate data or run C2 over a channel that firewalls rarely block. Detected by anomalous query volume, entropy, and record types to a single domain.</p>
+    </div>
+
+    <div class="grid">
+      <div class="card attack">
+        <h3>Hijacking &amp; rebinding</h3>
+        <p><b>DNS hijacking</b> alters resolver settings or registrar/zone records to redirect traffic. <b>DNS rebinding</b> abuses short TTLs to make a browser resolve a name first to the attacker, then to an internal IP — bypassing same-origin defenses to reach internal services.</p>
+      </div>
+      <div class="card attack">
+        <h3>Subdomain takeover &amp; NXDOMAIN abuse</h3>
+        <p>A dangling <code>CNAME</code> pointing to a deprovisioned cloud resource lets an attacker claim it and serve content under your domain. <b>NXDOMAIN / random-subdomain (water torture)</b> floods resolvers with junk names to exhaust authoritative servers.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section id="security">
+    <h2><span class="num">06</span> DNS Security Mechanisms</h2>
+    <p class="lead">Defenses split into three goals: <b>integrity</b> (is the answer authentic?), <b>confidentiality</b> (who can read my queries?), and <b>availability / hygiene</b> (resilience and abuse prevention).</p>
+
+    <div class="card defense">
+      <h3>DNSSEC — integrity</h3>
+      <p>DNSSEC signs records with public-key crypto. Each RRset carries an <code>RRSIG</code>; <code>DNSKEY</code> holds the zone's keys; and a <code>DS</code> record in the parent zone hashes the child's key, forming a <b>chain of trust</b> from the root down. A validating resolver rejects any answer whose signature doesn't verify — defeating cache poisoning and spoofing.</p>
+      <div class="callout"><b>Note:</b> DNSSEC provides authenticity and integrity, <em>not</em> confidentiality. Queries and answers are still cleartext. <code>NSEC/NSEC3</code> give signed proof that a name does <em>not</em> exist.</div>
+    </div>
+
+    <div class="card defense">
+      <h3>Query hardening — anti-spoofing</h3>
+      <div class="kv"><b>Port random.</b><span>Randomized source ports add ~16 bits of entropy against blind forgery.</span></div>
+      <div class="kv"><b>0x20 encoding.</b><span>Randomizing the case of query names adds unpredictability the attacker must also match.</span></div>
+      <div class="kv"><b>TXID entropy.</b><span>Cryptographically random transaction IDs, not sequential.</span></div>
+    </div>
+
+    <div class="card defense">
+      <h3>Encrypted transport — confidentiality</h3>
+      <p><b>DoT</b> (853), <b>DoH</b> (443), and <b>DoQ</b> wrap DNS in TLS/QUIC so on-path observers can't read or tamper with queries. Complements DNSSEC rather than replacing it — one protects the wire, the other protects the data.</p>
+    </div>
+
+    <div class="grid">
+      <div class="card defense">
+        <h3>Availability &amp; abuse control</h3>
+        <p>Response Rate Limiting (<b>RRL</b>) blunts amplification. Disabling open recursion, restricting <code>ANY</code>, and <b>BCP 38</b> ingress filtering cut reflection. Anycast and redundant NS spread load and survive DDoS. Restrict <code>AXFR</code> to trusted peers (TSIG).</p>
+      </div>
+      <div class="card defense">
+        <h3>Authenticated management</h3>
+        <p><b>TSIG</b> (shared-key) and <b>SIG(0)</b> authenticate zone transfers and dynamic updates. <b>CAA</b> records limit which CAs can issue certificates for your domain. Registrar lock and DNSSEC guard against hijacking.</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <b>Defense-in-depth cheat sheet:</b>
+      <div class="pill-row" style="margin-top:8px">
+        <span class="pill">Poisoning → DNSSEC + port/0x20 randomization</span>
+        <span class="pill">Amplification → RRL + BCP 38 + close open resolvers</span>
+        <span class="pill">Eavesdropping → DoT / DoH / DoQ</span>
+        <span class="pill">Zone transfer → TSIG</span>
+        <span class="pill">Cert misissuance → CAA</span>
+        <span class="pill">Tunneling → query analytics / DNS firewall</span>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  DNS reference · resolution, transport, records, attacks &amp; defenses · built for study and teaching.
+</footer>
+
+</body>
+</html>
