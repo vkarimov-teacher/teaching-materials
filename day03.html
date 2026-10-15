@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DoS &amp; DDoS — Anatomy &amp; Defense Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#F5F6FB;--surface:#FFFFFF;--ink:#14161F;--slate:#5A6274;--line:#E5E8F1;
+    --indigo:#4F46E5;--indigo-soft:#ECEBFD;
+    --attack:#F43F3F;--attack-soft:#FDE6E6;--attack-2:#FB923C;
+    --legit:#0EA5E9;--legit-soft:#E1F3FD;
+    --safe:#0F9F6E;--safe-soft:#DDF5EC;--amber:#E4922B;
+    --arena:#0D1424;--arena-2:#141d33;
+    --sans:"Inter",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    --display:"Sora",var(--sans);--mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+    --r:16px;--maxw:1080px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--canvas);color:var(--ink);font-family:var(--sans);font-size:16.5px;line-height:1.6;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3,h4{font-family:var(--display);letter-spacing:-.015em;line-height:1.14;font-weight:600;margin:0;}
+  p{margin:0 0 14px;}
+  button{font-family:inherit;}
+
+  .prog{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--legit),var(--indigo),var(--attack));width:0;z-index:60;transition:width .1s;}
+  .nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);}
+  .nav .in{max-width:var(--maxw);margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .logo{font-family:var(--display);font-weight:700;font-size:15px;}.logo b{color:var(--indigo);}
+  .logo span{font-family:var(--mono);font-size:11px;color:var(--slate);font-weight:400;}
+  .navpills{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap;}
+  .navpills a{font-size:13px;color:var(--slate);text-decoration:none;padding:6px 12px;border-radius:20px;transition:.15s;}
+  .navpills a:hover{background:var(--indigo-soft);color:var(--indigo);}
+
+  .hero{max-width:var(--maxw);margin:0 auto;padding:50px 20px 20px;}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);padding:6px 13px;border-radius:20px;font-size:12.5px;color:var(--slate);font-family:var(--mono);margin-bottom:18px;}
+  .eyebrow i{width:8px;height:8px;border-radius:50%;background:var(--attack);display:inline-block;animation:blink 1.4s infinite;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+  .hero h1{font-size:clamp(30px,5.5vw,52px);font-weight:700;max-width:16ch;margin-bottom:16px;}
+  .hero h1 em{font-style:normal;background:linear-gradient(120deg,var(--attack),var(--attack-2));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .hero .sub{font-size:19px;color:var(--slate);max-width:62ch;margin-bottom:20px;}
+  .legal{display:flex;gap:12px;align-items:flex-start;background:#FFF7ED;border:1px solid #FCD9A8;border-radius:12px;padding:13px 16px;font-size:13.5px;color:#8a5a12;max-width:70ch;}
+  .legal b{color:#7a4d0a;}
+  .legal .warn{font-size:18px;line-height:1;}
+
+  main{max-width:var(--maxw);margin:0 auto;padding:0 20px 70px;}
+  .block{margin-top:32px;}
+  .block-head{display:flex;align-items:center;gap:12px;margin:34px 0 4px;}
+  .tag{font-family:var(--mono);font-size:12px;font-weight:500;padding:4px 10px;border-radius:8px;}
+  .tag.exp{background:var(--indigo-soft);color:var(--indigo);}
+  .tag.lab{background:var(--attack-soft);color:#c02929;}
+  .tag.def{background:var(--safe-soft);color:#0a7a54;}
+  .block-head h2{font-size:26px;}
+  .lede{color:var(--slate);max-width:72ch;margin:6px 0 12px;}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);}
+  .pad{padding:22px 24px;}
+  h3.mini{font-size:18px;margin:26px 0 10px;}
+
+  /* concept trio */
+  .trio{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:8px;}
+  .concept{border:1px solid var(--line);border-radius:14px;padding:18px 20px;background:var(--surface);}
+  .concept .ic{font-size:22px;}
+  .concept h4{font-size:16px;margin:8px 0 6px;}
+  .concept p{font-size:14px;color:var(--slate);margin:0;}
+
+  /* taxonomy */
+  .cat-head{display:flex;align-items:center;gap:10px;margin:24px 0 10px;}
+  .cat-dot{width:12px;height:12px;border-radius:50%;}
+  .cat-head h3{font-size:17px;}
+  .cat-head .sub{font-size:13px;color:var(--slate);}
+  .atk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  .atk{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:15px 16px;cursor:pointer;transition:.15s;border-left:3px solid var(--line);}
+  .atk:hover{border-left-color:var(--attack);box-shadow:0 6px 16px rgba(0,0,0,.05);}
+  .atk.open{border-left-color:var(--attack);}
+  .atk .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
+  .atk h4{font-size:15.5px;}
+  .atk .layer{font-family:var(--mono);font-size:10.5px;color:var(--slate);background:var(--canvas);padding:2px 7px;border-radius:6px;white-space:nowrap;}
+  .atk .body{max-height:0;overflow:hidden;transition:max-height .3s;}
+  .atk.open .body{max-height:320px;margin-top:10px;}
+  .atk .body p{font-size:13.5px;color:var(--slate);margin:0 0 8px;}
+  .atk .body .mit{font-size:12.5px;background:var(--safe-soft);border-radius:8px;padding:8px 11px;}
+  .atk .body .mit b{color:#0a7a54;}
+  .atk .body .ex{font-size:12px;color:var(--slate);font-style:italic;margin-top:6px;}
+
+  /* ===== DEFENSE LAB ===== */
+  .lab{background:var(--arena);border-radius:var(--r);overflow:hidden;border:1px solid #24304d;}
+  .lab-top{display:grid;grid-template-columns:1.4fr 1fr;}
+  @media(max-width:820px){.lab-top{grid-template-columns:1fr;}}
+  .arena-col{position:relative;background:radial-gradient(700px 300px at 70% 10%,#1a2745 0,transparent 70%),var(--arena);min-height:340px;}
+  canvas{display:block;width:100%;height:340px;}
+  .metrics{position:absolute;top:12px;left:12px;display:flex;gap:8px;flex-wrap:wrap;}
+  .metric{background:rgba(9,14,26,.75);border:1px solid #2a3a5c;border-radius:10px;padding:8px 11px;min-width:96px;}
+  .metric .k{font-family:var(--mono);font-size:9.5px;color:#8a9bc0;text-transform:uppercase;letter-spacing:.04em;}
+  .metric .v{font-family:var(--display);font-weight:700;font-size:18px;color:#fff;line-height:1.1;margin-top:2px;}
+  .metric .v small{font-size:11px;color:#9fb1d4;font-weight:400;}
+  .status-badge{position:absolute;bottom:12px;left:12px;font-family:var(--mono);font-size:12px;font-weight:600;padding:6px 12px;border-radius:20px;}
+  .status-badge.healthy{background:var(--safe-soft);color:#0a7a54;}
+  .status-badge.degraded{background:#FEF3C7;color:#a05a12;}
+  .status-badge.offline{background:var(--attack-soft);color:#c02929;}
+  .status-badge.sink{background:#1e293b;color:#94a3b8;border:1px solid #334155;}
+
+  .ctrl-col{background:var(--arena-2);padding:16px 18px;border-left:1px solid #22304d;color:#dbe3f2;}
+  .ctrl-col h4{color:#fff;font-size:13px;font-family:var(--mono);font-weight:500;text-transform:uppercase;letter-spacing:.05em;margin:0 0 10px;}
+  .atk-pick{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px;}
+  .atk-pick button{background:#101a30;border:1px solid #29385a;color:#b9c6e0;border-radius:9px;padding:8px 6px;font-size:12px;cursor:pointer;transition:.12s;line-height:1.2;}
+  .atk-pick button:hover{border-color:var(--attack);}
+  .atk-pick button.on{background:var(--attack);border-color:var(--attack);color:#fff;font-weight:600;}
+  .slider-row{margin-bottom:14px;}
+  .slider-row label{display:flex;justify-content:space-between;font-size:12.5px;color:#a9b7d4;margin-bottom:6px;}
+  .slider-row label b{color:#fff;font-family:var(--mono);}
+  input[type=range]{width:100%;accent-color:var(--attack);}
+  .run-btns{display:flex;gap:8px;margin-bottom:16px;}
+  .run-btns button{flex:1;border-radius:10px;padding:10px;font-size:13.5px;font-weight:600;cursor:pointer;border:1px solid transparent;}
+  #btnRun{background:var(--attack);color:#fff;}
+  #btnRun.running{background:#7f1d1d;}
+  #btnReset{background:#1a2540;color:#b9c6e0;border-color:#2b3a5c;}
+  .mit-title{display:flex;justify-content:space-between;align-items:center;}
+  .mit-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+  .mit{display:flex;align-items:center;gap:7px;background:#101a30;border:1px solid #26344f;border-radius:9px;padding:8px 9px;font-size:11.8px;color:#c3cfe6;cursor:pointer;user-select:none;transition:.12s;}
+  .mit:hover{border-color:var(--safe);}
+  .mit.on{background:rgba(15,159,110,.16);border-color:var(--safe);color:#c9f5e4;}
+  .mit .dot{width:9px;height:9px;border-radius:3px;border:1.5px solid #3a4a6c;flex:0 0 auto;}
+  .mit.on .dot{background:var(--safe);border-color:var(--safe);}
+  .lab-explain{background:#0b1220;border-top:1px solid #22304d;padding:13px 18px;font-size:13.5px;color:#c6d2ea;display:flex;gap:10px;align-items:flex-start;}
+  .lab-explain .i{color:var(--attack-2);font-weight:700;}
+  .lab-explain b{color:#fff;}
+
+  /* mitigation deep dive */
+  .mitdd{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px;}
+  .mrow{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:15px 17px;border-top:3px solid var(--safe);}
+  .mrow h4{font-size:15.5px;margin:0 0 5px;}
+  .mrow .where{font-family:var(--mono);font-size:11px;color:var(--indigo);margin-bottom:6px;}
+  .mrow p{font-size:13.5px;color:var(--slate);margin:0;}
+
+  /* quiz */
+  .quizhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:10px;}
+  .score{font-family:var(--mono);font-size:14px;background:var(--indigo-soft);color:var(--indigo);padding:7px 14px;border-radius:20px;font-weight:500;}
+  .q{border-top:1px solid var(--line);padding:18px 0;}.q:first-child{border-top:none;}
+  .qt{font-weight:600;font-size:15.5px;margin-bottom:12px;}.qt .qn{font-family:var(--mono);color:var(--indigo);font-size:13px;margin-right:8px;}
+  .opts{display:grid;gap:8px;}
+  .opt{text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:11px;padding:11px 15px;font-size:14.5px;cursor:pointer;color:var(--ink);transition:.15s;}
+  .opt:hover{border-color:var(--indigo);}
+  .opt.correct{background:var(--safe-soft);border-color:var(--safe);}
+  .opt.wrong{background:var(--attack-soft);border-color:var(--attack);}
+  .opt .mk{float:right;font-weight:700;}
+  .exp{margin-top:10px;font-size:13.5px;color:var(--slate);background:var(--canvas);border-radius:9px;padding:10px 13px;display:none;}
+  .exp.show{display:block;}.exp b{color:var(--ink);}
+
+  footer{max-width:var(--maxw);margin:0 auto;padding:24px 20px 60px;color:var(--slate);font-size:13px;}
+  footer .rule{height:1px;background:var(--line);margin-bottom:14px;}
+
+  @media(max-width:840px){.trio,.atk-grid,.mitdd{grid-template-columns:1fr;}.navpills{display:none;}}
+  @media(prefers-reduced-motion:reduce){.hero .eyebrow i{animation:none;}html{scroll-behavior:auto;}}
+</style>
+</head>
+<body>
+<div class="prog" id="prog"></div>
+
+<nav class="nav"><div class="in">
+  <div class="logo"><b>Network Security</b> <span>// DoS &amp; DDoS</span></div>
+  <div class="navpills">
+    <a href="#basics">Basics</a><a href="#types">Attack types</a>
+    <a href="#lab">Defense Lab</a><a href="#mitigation">Mitigation</a><a href="#test">Test</a>
+  </div>
+</div></nav>
+
+<header class="hero">
+  <div class="eyebrow"><i></i> LECTURE · DENIAL OF SERVICE · INTERACTIVE LAB</div>
+  <h1>DoS &amp; DDoS: <em>Anatomy</em> &amp; Defense Lab</h1>
+  <p class="sub">One goal, many methods: exhaust a resource until a service can't answer real users. Learn how each attack type works, then run a hands-on simulation and defend a server in real time.</p>
+  <div class="legal"><span class="warn">⚠</span><div><b>Simulation only.</b> The lab below generates <b>no real traffic</b> — it animates a model. Launching an actual DoS/DDoS attack against systems you don't own is a crime in most countries. This page exists to teach <b>defense</b>.</div></div>
+</header>
+
+<main>
+
+  <!-- BASICS -->
+  <section class="block" id="basics">
+    <div class="block-head"><span class="tag exp">concept</span><h2>What is a denial-of-service attack?</h2></div>
+    <p class="lede">A <b>DoS</b> (Denial of Service) attack tries to make a system unavailable to its legitimate users — it targets the <b>Availability</b> leg of the CIA triad. Instead of stealing data, it exhausts a limited resource: bandwidth, connection slots, CPU, memory, or an application's worker threads.</p>
+    <div class="trio">
+      <div class="concept"><div class="ic">🎯</div><h4>DoS — one source</h4><p>A single machine floods the target. Easier to trace and block by its source address.</p></div>
+      <div class="concept"><div class="ic">🌐</div><h4>DDoS — many sources</h4><p>Thousands of compromised devices (a <b>botnet</b>) attack at once. Far harder to filter, since traffic comes from everywhere.</p></div>
+      <div class="concept"><div class="ic">📡</div><h4>Reflection &amp; amplification</h4><p>The attacker spoofs the victim's IP and asks public servers for large replies — turning a small request into a huge flood aimed at the victim.</p></div>
+    </div>
+    <p class="lede" style="margin-top:16px">Attacks fall into three families by <b>what</b> they exhaust. That's the map for both the taxonomy below and the Defense Lab — because the right mitigation depends entirely on the family.</p>
+  </section>
+
+  <!-- TYPES -->
+  <section class="block" id="types">
+    <div class="block-head"><span class="tag exp">taxonomy</span><h2>The attack types</h2></div>
+    <p class="lede">Click any card to expand. Notice how the mitigation changes with the family.</p>
+
+    <div class="cat-head"><span class="cat-dot" style="background:var(--attack)"></span><h3>Volumetric</h3><span class="sub">— saturate bandwidth · measured in Gbps</span></div>
+    <div class="atk-grid" id="cat-vol"></div>
+
+    <div class="cat-head" style="margin-top:26px"><span class="cat-dot" style="background:var(--attack-2)"></span><h3>Protocol / state-exhaustion</h3><span class="sub">— exhaust connection tables &amp; device state · measured in packets/s</span></div>
+    <div class="atk-grid" id="cat-proto"></div>
+
+    <div class="cat-head" style="margin-top:26px"><span class="cat-dot" style="background:var(--indigo)"></span><h3>Application-layer (Layer 7)</h3><span class="sub">— exhaust server/app resources with valid-looking requests · measured in requests/s</span></div>
+    <div class="atk-grid" id="cat-app"></div>
+  </section>
+
+  <!-- LAB -->
+  <section class="block" id="lab">
+    <div class="block-head"><span class="tag lab">interactive</span><h2>Defense Lab</h2></div>
+    <p class="lede">You're defending one web server. Pick an attack, scale the botnet, hit <b>Launch</b>, then toggle mitigations and watch the effect. Key lesson: <b>the wrong mitigation does nothing</b> — match the defense to the attack family.</p>
+
+    <div class="lab">
+      <div class="lab-top">
+        <div class="arena-col">
+          <canvas id="arena"></canvas>
+          <div class="metrics">
+            <div class="metric"><div class="k">Attack load</div><div class="v"><span id="mLoad">0</span><small id="mUnit"> Gbps</small></div></div>
+            <div class="metric"><div class="k">Server load</div><div class="v"><span id="mServer">2</span><small>%</small></div></div>
+            <div class="metric"><div class="k">Users served</div><div class="v"><span id="mUsers">100</span><small>%</small></div></div>
+          </div>
+          <div class="status-badge healthy" id="statusBadge">● HEALTHY</div>
+        </div>
+
+        <div class="ctrl-col">
+          <h4>1 · Attack vector</h4>
+          <div class="atk-pick" id="atkPick"></div>
+
+          <div class="slider-row">
+            <label>2 · Botnet size / intensity <b id="intVal">50%</b></label>
+            <input type="range" id="intensity" min="5" max="100" value="50">
+          </div>
+
+          <div class="run-btns">
+            <button id="btnRun">▶ Launch attack</button>
+            <button id="btnReset">Reset</button>
+          </div>
+
+          <div class="mit-title"><h4>3 · Mitigations</h4></div>
+          <div class="mit-grid" id="mitGrid"></div>
+        </div>
+      </div>
+      <div class="lab-explain"><span class="i">›</span><div id="labExplain">Pick an attack vector and press <b>Launch</b> to begin. Watch which mitigation brings users served back to 100%.</div></div>
+    </div>
+  </section>
+
+  <!-- MITIGATION -->
+  <section class="block" id="mitigation">
+    <div class="block-head"><span class="tag def">defense</span><h2>Mitigation, layer by layer</h2></div>
+    <p class="lede">Real DDoS defense is layered — no single control stops everything. These are the building blocks used in the lab.</p>
+    <div class="mitdd" id="mitDeep"></div>
+    <p class="lede" style="margin-top:16px"><b>Prevention matters too:</b> amplification attacks rely on IP spoofing. If every network filtered outbound spoofed source addresses (<span style="font-family:var(--mono);font-size:13px">BCP 38 / source address validation</span>), reflection attacks would largely dry up.</p>
+  </section>
+
+  <!-- TEST -->
+  <section class="block" id="test">
+    <div class="block-head"><span class="tag exp">check</span><h2>Test yourself</h2></div>
+    <div class="card pad">
+      <div class="quizhead"><div style="font-family:var(--display);font-weight:600">Quick quiz</div><div class="score" id="score">Score: 0 / 0</div></div>
+      <div id="quiz"></div>
+    </div>
+  </section>
+
+</main>
+
+<footer><div class="rule"></div>
+  Network Security · DoS &amp; DDoS — anatomy &amp; interactive defense lab. The simulation is a client-side model; no packets are sent. Figures are illustrative for teaching.
+</footer>
+
+<script>
+/* ============ ATTACK DATA ============ */
+// mit multipliers: <1 means that mitigation reduces this attack's effective load. Missing = no effect (=1).
+const ATTACKS={
+  udp:{name:"UDP flood",cat:"vol",layer:"L3/L4",unit:"Gbps",weight:90,color:"#F43F3F",
+    desc:"Floods random ports with UDP packets. The host wastes resources checking each port and replying with ICMP 'unreachable', while the sheer volume saturates the link.",
+    ex:"A classic raw-bandwidth attack, often amplified by botnets.",
+    mitTxt:"Upstream/edge filtering, rate limiting, and a scrubbing service.",
+    mit:{rateLimit:.6,firewall:.8,cdn:.5,scrub:.22,blackhole:.05}},
+  icmp:{name:"ICMP (ping) flood",cat:"vol",layer:"L3",unit:"Gbps",weight:75,color:"#F43F3F",
+    desc:"Overwhelms the target with ICMP echo-request (ping) packets, consuming both inbound and outbound bandwidth as it tries to reply.",
+    ex:"'Smurf' is the amplified cousin: pings a broadcast address with the victim's spoofed IP.",
+    mitTxt:"Rate-limit or deprioritise ICMP at the edge; drop pings to the broadcast address.",
+    mit:{rateLimit:.5,firewall:.5,cdn:.6,scrub:.3,blackhole:.05}},
+  dns:{name:"DNS amplification",cat:"vol",layer:"L3/L4",unit:"Gbps",weight:135,color:"#FB923C",
+    desc:"Reflection attack: the attacker sends tiny DNS queries to open resolvers with the victim's spoofed IP. The large replies (often 50×+ bigger) all flood the victim.",
+    ex:"NTP, memcached and CLDAP work the same way — memcached has hit >51,000× amplification.",
+    mitTxt:"Anti-spoofing (BCP 38), scrubbing centres, and rate limiting. Close open resolvers.",
+    mit:{firewall:.8,rateLimit:.8,cdn:.5,scrub:.18,blackhole:.05}},
+  syn:{name:"SYN flood",cat:"proto",layer:"L4",unit:"Kpps",weight:70,color:"#FB923C",
+    desc:"Abuses the TCP handshake: sends a storm of SYN packets but never completes them, filling the server's table of half-open connections so real clients can't connect.",
+    ex:"The textbook state-exhaustion attack — low bandwidth, big impact.",
+    mitTxt:"SYN cookies (don't hold state until the handshake completes), plus rate limiting.",
+    mit:{synCookies:.2,rateLimit:.6,firewall:.7,cdn:.6,scrub:.4,blackhole:.05}},
+  ack:{name:"ACK flood",cat:"proto",layer:"L4",unit:"Kpps",weight:65,color:"#FB923C",
+    desc:"Floods the target with TCP ACK packets. The device burns CPU checking each one against its connection table for a session that doesn't exist.",
+    ex:"Sometimes used to slip past defences that only watch for SYN packets.",
+    mitTxt:"Stateful inspection at scale, rate limiting, and upstream scrubbing.",
+    mit:{rateLimit:.55,firewall:.7,cdn:.55,scrub:.35,blackhole:.05}},
+  pod:{name:"Ping of Death / Teardrop",cat:"proto",layer:"L3",unit:"Kpps",weight:55,color:"#FB923C",
+    desc:"Malformed-packet attacks: oversized or overlapping IP fragments that crash a vulnerable network stack when it tries to reassemble them.",
+    ex:"Largely historical — patched stacks reject the malformed fragments.",
+    mitTxt:"Patch the OS/stack; drop malformed and overlapping fragments at the firewall.",
+    mit:{firewall:.35,rateLimit:.7,scrub:.4,blackhole:.05}},
+  http:{name:"HTTP(S) flood",cat:"app",layer:"L7",unit:"req/s",weight:65,color:"#6366F1",
+    desc:"Sends many valid-looking GET/POST requests to expensive pages (search, login, cart). Each looks legitimate, so raw filtering fails — it exhausts app threads and databases.",
+    ex:"POST floods hit even harder by forcing server-side processing on each request.",
+    mitTxt:"WAF + behavioural analysis, per-client rate limits, CAPTCHA, and CDN caching.",
+    mit:{waf:.4,rateLimit:.5,cdn:.5,firewall:.9,scrub:.7,blackhole:.05}},
+  slow:{name:"Slowloris / Slow POST",cat:"app",layer:"L7",unit:"conns",weight:55,color:"#6366F1",
+    desc:"A low-and-slow attack: opens many connections and sends partial HTTP requests very slowly, holding every connection slot open so the server can't serve anyone else.",
+    ex:"Tiny bandwidth, huge effect — a single machine can stall a web server.",
+    mitTxt:"Aggressive connection timeouts, per-IP connection limits, and a reverse proxy / WAF.",
+    mit:{waf:.3,rateLimit:.6,cdn:.5,firewall:.9,scrub:.8,blackhole:.05}}
+};
+const ORDER=["udp","icmp","dns","syn","ack","pod","http","slow"];
+
+const MITS={
+  rateLimit:{n:"Rate limiting",where:"Edge / server",txt:"Caps how many requests or packets a single source may send in a window. Blunts most floods; a large botnet spreads thin enough to slip some through."},
+  synCookies:{n:"SYN cookies",where:"OS / TCP stack",txt:"The server encodes connection state into the handshake instead of storing it, so a half-open flood can't exhaust its table. The specific cure for SYN floods."},
+  firewall:{n:"Firewall / ACLs",where:"Network edge",txt:"Blocks by port, protocol, geography or known-bad IPs, and drops malformed packets. Good against simple and malformed-packet attacks, weak against valid Layer-7 traffic."},
+  waf:{n:"Web App Firewall",where:"Layer 7",txt:"Inspects HTTP requests and applies behavioural rules, challenges and CAPTCHAs. The tool for application-layer floods and Slowloris — useless against raw volumetric floods."},
+  cdn:{n:"CDN / Anycast",where:"Global edge",txt:"Spreads traffic across many data centres and caches content, absorbing volume close to its source before it reaches the origin."},
+  scrub:{n:"Scrubbing centre",where:"Upstream cloud",txt:"Reroutes all traffic through a high-capacity filtering service that strips attack packets and forwards only clean traffic. The heavy artillery for large volumetric attacks."},
+  blackhole:{n:"Blackhole / sinkhole",where:"Upstream (RTBH)",txt:"Null-routes ALL traffic to the victim's IP. It saves the wider network — but the service stays down for real users too. A last resort, not a win."}
+};
+
+/* ============ Render taxonomy ============ */
+function renderTaxonomy(){
+  const map={vol:"cat-vol",proto:"cat-proto",app:"cat-app"};
+  ORDER.forEach(k=>{
+    const a=ATTACKS[k]; const el=document.createElement("div"); el.className="atk";
+    el.innerHTML=`<div class="top"><h4>${a.name}</h4><span class="layer">${a.layer}</span></div>
+      <div class="body"><p>${a.desc}</p><div class="mit"><b>Mitigation:</b> ${a.mitTxt}</div><div class="ex">${a.ex}</div></div>`;
+    el.onclick=()=>el.classList.toggle("open");
+    document.getElementById(map[a.cat]).appendChild(el);
+  });
+}
+renderTaxonomy();
+
+/* ============ Mitigation deep dive ============ */
+(function(){
+  const box=document.getElementById("mitDeep");
+  Object.values(MITS).forEach(m=>{
+    const d=document.createElement("div"); d.className="mrow";
+    d.innerHTML=`<h4>${m.n}</h4><div class="where">${m.where}</div><p>${m.txt}</p>`;
+    box.appendChild(d);
+  });
+})();
+
+/* ============ DEFENSE LAB ============ */
+const cv=document.getElementById("arena");
+const ctx=cv.getContext("2d");
+let W=0,H=340,DPR=Math.min(window.devicePixelRatio||1,2);
+function resize(){ W=cv.clientWidth; cv.width=W*DPR; cv.height=H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); layoutNodes(); }
+
+const state={attack:"syn",intensity:50,running:false,
+  mit:{rateLimit:false,synCookies:false,firewall:false,waf:false,cdn:false,scrub:false,blackhole:false},
+  serverLoad:2,users:100,dispLoad:0};
+const CAPACITY=100, LEGIT_DEMAND=18;
+const reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* attack picker */
+const pick=document.getElementById("atkPick");
+ORDER.forEach(k=>{
+  const b=document.createElement("button"); b.textContent=ATTACKS[k].name; b.dataset.k=k;
+  if(k===state.attack)b.classList.add("on");
+  b.onclick=()=>{state.attack=k;[...pick.children].forEach(x=>x.classList.toggle("on",x.dataset.k===k));updateUnit();compute();updateExplain();};
+  pick.appendChild(b);
+});
+/* mitigations */
+const mg=document.getElementById("mitGrid");
+Object.keys(MITS).forEach(k=>{
+  const el=document.createElement("div"); el.className="mit"; el.dataset.k=k;
+  el.innerHTML=`<span class="dot"></span>${MITS[k].n}`;
+  el.onclick=()=>{state.mit[k]=!state.mit[k];el.classList.toggle("on",state.mit[k]);compute();updateExplain();};
+  mg.appendChild(el);
+});
+const intEl=document.getElementById("intensity"),intVal=document.getElementById("intVal");
+intEl.oninput=()=>{state.intensity=+intEl.value;intVal.textContent=intEl.value+"%";compute();};
+const runBtn=document.getElementById("btnRun");
+runBtn.onclick=()=>{state.running=!state.running;runBtn.classList.toggle("running",state.running);
+  runBtn.textContent=state.running?"■ Stop attack":"▶ Launch attack";compute();updateExplain();};
+document.getElementById("btnReset").onclick=()=>{
+  state.running=false;state.intensity=50;intEl.value=50;intVal.textContent="50%";
+  Object.keys(state.mit).forEach(k=>state.mit[k]=false);
+  [...mg.children].forEach(x=>x.classList.remove("on"));
+  runBtn.classList.remove("running");runBtn.textContent="▶ Launch attack";
+  compute();updateExplain();};
+
+/* ---- core model ---- */
+function effectiveAttack(){
+  if(!state.running) return 0;
+  const a=ATTACKS[state.attack];
+  let raw=a.weight*(state.intensity/100);
+  let f=1;
+  for(const k in state.mit){ if(state.mit[k] && a.mit[k]!==undefined) f*=a.mit[k]; }
+  return raw*f;
+}
+const mUnit=document.getElementById("mUnit");
+function updateUnit(){ mUnit.textContent=" "+ATTACKS[state.attack].unit; }
+function compute(){
+  const eff=effectiveAttack();
+  // display attack magnitude scaled to a plausible-looking number per unit
+  const a=ATTACKS[state.attack]; let disp=eff;
+  if(a.unit==="Gbps") disp=eff*8;         // up to ~1000+
+  else if(a.unit==="Kpps") disp=eff*30;
+  else if(a.unit==="req/s") disp=eff*900;
+  else if(a.unit==="conns") disp=eff*45;
+  state.dispTarget=Math.round(disp);
+  // server + users
+  const blackholed=state.mit.blackhole && state.running;
+  const load=Math.min(100,Math.round((eff+LEGIT_DEMAND)/CAPACITY*100));
+  let users;
+  if(blackholed){ users=0; }
+  else { users=Math.max(0,Math.min(100,Math.round((CAPACITY-eff)/LEGIT_DEMAND*100))); }
+  state.serverTarget=blackholed?4:load;
+  state.usersTarget=users;
+  state.blackholed=blackholed;
+}
+function statusOf(){
+  if(state.blackholed) return["sink","● SINKHOLED — down to all"];
+  if(state.usersTarget>80) return["healthy","● HEALTHY"];
+  if(state.usersTarget>30) return["degraded","● DEGRADED"];
+  return["offline","● OFFLINE"];
+}
+function updateExplain(){
+  const a=ATTACKS[state.attack], box=document.getElementById("labExplain");
+  if(!state.running){ box.innerHTML=`<b>${a.name}</b> selected. This is a <b>${a.cat==="vol"?"volumetric":a.cat==="proto"?"protocol / state-exhaustion":"application-layer"}</b> attack. Press <b>Launch</b> to begin.`; return; }
+  if(state.blackholed){ box.innerHTML="You <b>blackholed</b> the target IP. The attack traffic is gone and the network survives — but every real user is dropped too. Service is still <b>offline</b>. Blackholing protects the network, not the service."; return; }
+  if(state.usersTarget>80){
+    const used=Object.keys(state.mit).filter(k=>state.mit[k]&&a.mit[k]!==undefined&&a.mit[k]<.5);
+    box.innerHTML=`Service restored ✓ — the mitigation you enabled is <b>effective</b> against ${a.name}. ${used.length?"":"Try turning it off to see the flood return."}`;
+    return;
+  }
+  // suggest the strongest missing mitigation
+  let best=null,bestv=1;
+  for(const k in a.mit){ if(a.mit[k]<bestv && !state.mit[k]){best=k;bestv=a.mit[k];} }
+  const hint=best?`Try enabling <b>${MITS[best].n}</b> — it targets this family.`:"You've applied the strong defences; scale the botnet down or accept residual load.";
+  box.innerHTML=`<b>${a.name}</b> is overwhelming the server (${a.cat==="app"?"exhausting app threads":a.cat==="proto"?"filling the connection table":"saturating bandwidth"}). ${hint}`;
+}
+
+/* ---- canvas nodes ---- */
+let server={x:0,y:0}, attackers=[], legits=[], packets=[];
+function layoutNodes(){
+  server={x:W*0.72,y:H/2};
+  attackers=[]; const n=14;
+  for(let i=0;i<n;i++){ const t=i/(n-1); attackers.push({x:W*0.10,y:30+t*(H-60),ph:Math.random()*6}); }
+  legits=[]; for(let i=0;i<3;i++){ legits.push({x:W*0.06,y:H*0.5+(i-1)*40}); }
+}
+function spawn(){
+  const eff=effectiveAttack();
+  // attack packets ∝ eff
+  const rate=eff*0.05;
+  if(state.running){
+    let c=rate; while(c>0){ if(Math.random()<Math.min(1,c)){ const s=attackers[Math.floor(Math.random()*attackers.length)];
+      packets.push({sx:s.x,sy:s.y,tx:server.x,ty:server.y,p:0,sp:0.02+Math.random()*0.02,legit:false,col:ATTACKS[state.attack].color,r:ATTACKS[state.attack].unit==="Gbps"?3.2:2.3}); } c--; }
+  }
+  // legit users trickle
+  if(Math.random()<0.25){ const s=legits[Math.floor(Math.random()*legits.length)];
+    const served=Math.random()*100 < state.usersTarget && !state.blackholed;
+    packets.push({sx:s.x,sy:s.y,tx:server.x,ty:server.y,p:0,sp:0.03,legit:true,served,col:served?"#22C55E":"#64748B",r:3}); }
+}
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  // links
+  ctx.strokeStyle="rgba(120,140,180,.08)";ctx.lineWidth=1;
+  attackers.concat(legits).forEach(s=>{ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(server.x,server.y);ctx.stroke();});
+  // attacker nodes
+  attackers.forEach(s=>{ s.ph+=0.05; const glow=state.running?(0.5+0.5*Math.sin(s.ph)):0.3;
+    ctx.fillStyle=`rgba(244,63,63,${0.35+glow*0.5})`; ctx.beginPath();ctx.arc(s.x,s.y,4,0,7);ctx.fill(); });
+  // legit nodes
+  legits.forEach(s=>{ctx.fillStyle="#22C55E";ctx.beginPath();ctx.arc(s.x,s.y,5,0,7);ctx.fill();});
+  // packets
+  for(let i=packets.length-1;i>=0;i--){ const k=packets[i]; k.p+=k.sp;
+    const x=lerp(k.sx,k.tx,k.p), y=lerp(k.sy,k.ty,k.p);
+    ctx.fillStyle=k.col; ctx.globalAlpha=(k.legit&&!k.served)?0.55:1;
+    ctx.beginPath();ctx.arc(x,y,k.r,0,7);ctx.fill();ctx.globalAlpha=1;
+    if(k.p>=1) packets.splice(i,1);
+  }
+  // server
+  const st=statusOf()[0];
+  const ring=st==="healthy"?"#10B981":st==="degraded"?"#E4922B":st==="sink"?"#64748B":"#F43F3F";
+  const load=state.dispLoad/100;
+  ctx.beginPath();ctx.arc(server.x,server.y,26,0,7);ctx.fillStyle="#0b1220";ctx.fill();
+  ctx.lineWidth=4;ctx.strokeStyle="#1e293b";ctx.beginPath();ctx.arc(server.x,server.y,26,0,7);ctx.stroke();
+  ctx.strokeStyle=ring;ctx.beginPath();ctx.arc(server.x,server.y,26,-Math.PI/2,-Math.PI/2+Math.max(.02,load)*Math.PI*2);ctx.stroke();
+  ctx.fillStyle="#e2e8f0";ctx.font="600 11px 'JetBrains Mono',monospace";ctx.textAlign="center";ctx.textBaseline="middle";
+  ctx.fillText("SRV",server.x,server.y-1);
+  ctx.fillStyle="#8ea0c4";ctx.font="9px 'JetBrains Mono'";ctx.fillText(Math.round(state.dispLoad)+"%",server.x,server.y+11);
+  ctx.textAlign="start";
+}
+function lerp(a,b,t){return a+(b-a)*t;}
+
+/* ---- meters + loop ---- */
+let disp={load:0,server:2,users:100};
+function tickMeters(){
+  disp.load+=((state.dispTarget||0)-disp.load)*0.15;
+  disp.server+=((state.serverTarget||2)-disp.server)*0.15;
+  disp.users+=((state.usersTarget!==undefined?state.usersTarget:100)-disp.users)*0.15;
+  state.dispLoad=disp.server;
+  document.getElementById("mLoad").textContent=Math.round(disp.load);
+  document.getElementById("mServer").textContent=Math.round(disp.server);
+  document.getElementById("mUsers").textContent=Math.round(disp.users);
+  const [cls,txt]=statusOf(); const b=document.getElementById("statusBadge");
+  b.className="status-badge "+cls; b.textContent=txt;
+}
+let last=0;
+function loop(t){
+  if(t-last>32){ last=t; if(!reduce){spawn();draw();} tickMeters(); }
+  requestAnimationFrame(loop);
+}
+window.addEventListener("resize",resize);
+resize(); updateUnit(); compute(); updateExplain();
+if(reduce){ // static render + interval meters
+  layoutNodes(); draw(); setInterval(tickMeters,60);
+} else { requestAnimationFrame(loop); }
+
+/* ============ QUIZ ============ */
+const QUIZ=[
+  {q:"What does every DoS/DDoS attack ultimately target?",o:["Confidentiality","Integrity","Availability"],c:2,e:"They exhaust a resource so the service can't answer legitimate users — the Availability leg of the CIA triad."},
+  {q:"A SYN flood works by…",o:["Sending huge files to fill the disk","Leaving TCP handshakes half-open to fill the connection table","Encrypting the server's data"],c:1,e:"It abuses the TCP 3-way handshake, never completing it, so the table of half-open connections fills up. SYN cookies are the specific cure."},
+  {q:"Which mitigation is the RIGHT fit for an HTTP flood (Layer 7)?",o:["SYN cookies","A Web Application Firewall","Ping rate limiting"],c:1,e:"Layer-7 floods use valid-looking requests, so you need a WAF with behavioural analysis/CAPTCHA. SYN cookies do nothing here."},
+  {q:"In DNS amplification, why is the victim's IP spoofed?",o:["To hide the botnet's location only","So large resolver replies are all sent to the victim","To encrypt the queries"],c:1,e:"The attacker spoofs the victim's source IP so every big DNS reply floods the victim, not the attacker. Anti-spoofing (BCP 38) is the root fix."},
+  {q:"You blackhole (null-route) your server's IP during an attack. What happens?",o:["The service is fully restored","Attack stops but real users are also dropped","Only attackers are blocked"],c:1,e:"Blackholing drops ALL traffic to that IP — it protects the wider network but the service stays offline for everyone. It's a last resort."},
+  {q:"Slowloris is dangerous because it…",o:["Uses massive bandwidth","Holds many connections open with tiny, slow requests","Corrupts the database"],c:1,e:"It's 'low and slow' — a single machine keeps connection slots occupied with partial requests. Fix with connection timeouts and per-IP limits."}
+];
+const quizEl=document.getElementById("quiz"),scoreEl=document.getElementById("score");
+let ans=0,cor=0;
+QUIZ.forEach((Q,i)=>{
+  const q=document.createElement("div");q.className="q";
+  q.innerHTML=`<div class="qt"><span class="qn">Q${i+1}</span>${Q.q}</div>
+    <div class="opts">${Q.o.map((o,j)=>`<button class="opt" data-j="${j}">${o}</button>`).join("")}</div><div class="exp"></div>`;
+  const exp=q.querySelector(".exp");
+  q.querySelectorAll(".opt").forEach(btn=>btn.onclick=()=>{
+    if(q.dataset.done)return;q.dataset.done="1";ans++;
+    const j=+btn.dataset.j,opts=q.querySelectorAll(".opt");
+    opts[Q.c].classList.add("correct");opts[Q.c].insertAdjacentHTML("beforeend",'<span class="mk">✓</span>');
+    if(j===Q.c)cor++;else{btn.classList.add("wrong");btn.insertAdjacentHTML("beforeend",'<span class="mk">✗</span>');}
+    exp.innerHTML="<b>"+(j===Q.c?"Correct. ":"Not quite. ")+"</b>"+Q.e;exp.classList.add("show");
+    scoreEl.textContent=`Score: ${cor} / ${ans}`;
+  });
+  quizEl.appendChild(q);
+});
+
+/* progress bar */
+const prog=document.getElementById("prog");
+window.addEventListener("scroll",()=>{const h=document.documentElement.scrollHeight-window.innerHeight;prog.style.width=(scrollY/h*100)+"%";});
+</script>
+</body>
+</html>
