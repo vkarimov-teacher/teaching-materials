@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="az">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Penetration Testing Labs</title>
+    <title>Şəbəkə Təhlükəsizliyi S145A</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -17,15 +17,33 @@
             max-width: 700px;
             margin: 0 auto;
         }
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .logo {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
         h1 {
             font-size: 1.8rem;
-            margin-bottom: 0.5rem;
             color: #38bdf8;
+        }
+        h1 a {
+            color: #38bdf8;
+            text-decoration: none;
+        }
+        h1 a:hover {
+            text-decoration: underline;
         }
         .subtitle {
             color: #94a3b8;
             margin-bottom: 2rem;
             font-size: 1rem;
+            padding-left: 76px;
         }
         .lab-list {
             list-style: none;
@@ -58,8 +76,11 @@
 </head>
 <body>
     <div class="container">
-        <h1>🔐 Penetration Testing Labs</h1>
-        <p class="subtitle">Code Academy — Interactive Lab Materials</p>
+        <div class="header">
+            <img src="https://beu.edu.az/logos/BMU-logo-2024.png" alt="BMU Logo" class="logo">
+            <h1><a href="https://classroom.google.com/u/2/c/ODkyMDc1ODcwNDgz" target="_blank">Şəbəkə Təhlükəsizliyi S145A</a></h1>
+        </div>
+        <p class="subtitle">Bakı Mühəndislik Universiteti — İnteraktiv Dərs Materialları</p>
 
         <ul class="lab-list">
             <li><a href="day01.html">Day 1</a></li>
@@ -74,7 +95,7 @@
             <li><a href="day10.html">Day 10</a></li>
         </ul>
 
-        <p class="footer">© 2026 Code Academy Baku</p>
+        <p class="footer">© 2026 Bakı Mühəndislik Universiteti</p>
     </div>
 </body>
 </html>
