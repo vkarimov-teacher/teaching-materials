@@ -1,0 +1,876 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>Passive Recon</title><meta name="data-notion-page-icon" content="📓"/><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ctext%20y%3D%22.9em%22%20font-size%3D%2290%22%3E%F0%9F%93%93%3C%2Ftext%3E%3C%2Fsvg%3E"/><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+	/* Paint a complete callout box on every PDF page fragment. */
+	-webkit-box-decoration-break: clone;
+	box-decoration-break: clone;
+}
+
+/* For default-background callouts, render the border outline. */
+.callout.block-color-default_background {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+/*
+ * Toggles and callouts hold arbitrary content, so they can easily be taller
+ * than a page. They must stay breakable: avoiding breaks inside them makes
+ * Chromium push the whole block onto the next page, which leaves the previous
+ * page mostly empty before every long toggle.
+ */
+details,
+aside {
+	margin: 1.25em 0;
+}
+
+/* Keep a toggle's title on the same page as the start of its content. */
+summary {
+	page-break-after: avoid;
+	break-after: avoid;
+}
+
+/*
+ * Toggle headings render as <h1/h2/h3 style="display:inline-block"> inside
+ * <summary>. Without this reset, the heading's margin-top pushes it below the
+ * ::marker (▼), so the triangle and the title appear on separate lines.
+ */
+summary h1,
+summary h2,
+summary h3,
+summary h4 {
+	margin-top: 0;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+
+	table.collection-content {
+		width: 100%;
+		table-layout: fixed;
+	}
+
+	table.collection-content th,
+	table.collection-content td {
+		overflow-wrap: anywhere;
+	}
+
+	table.collection-content td > .user,
+	table.collection-content td > time {
+		white-space: pre-wrap;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content-wrapper {
+	overflow-x: auto;
+}
+
+@media only print {
+	.collection-content-wrapper {
+		overflow-x: visible;
+	}
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	gap: 46px;
+}
+
+.column {
+	min-width: 0;
+	overflow: hidden;
+}
+
+.column > *:first-child {
+	margin-top: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding-inline: 0.125rem;
+	padding-block: 0.375rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+table {
+	border-collapse: collapse;
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol.numbered-list.numbered-list-digits-2 {
+	padding-inline-start: 2em;
+}
+
+ol.numbered-list.numbered-list-digits-3plus {
+	padding-inline-start: 2.4em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+/*
+ * Render emoji icons using a ::before pseudo-element to keep the glyph
+ * out of the DOM textContent traversal. This avoids double-rendering icons
+ * in callouts and page titles.
+ * NOTE(slim/html-export-pseudo-icons): I can't tagref this because it will
+ * flag as a duplicate tag after codegen.
+ */
+.icon[data-emoji]::before {
+	content: attr(data-emoji);
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	margin-right: 0.4em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.tab {
+	margin: 1.25em 0;
+	padding-inline: 1rem;
+	border: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style><style>@import url('https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex-swap.min.css')</style></head><body><article id="bc587164-5935-44e7-8443-f8db041e6277" class="page sans" data-notion-page-icon="📓"><header><img class="page-cover-image" src="https://images.unsplash.com/photo-1539481915544-f5cd50562d66?ixlib=rb-4.0.3&amp;q=85&amp;fm=jpg&amp;crop=entropy&amp;cs=srgb" style="object-position:center 59.24%"/><div class="page-header-icon page-header-icon-with-cover"><span class="icon" data-emoji="📓"></span></div><h1 class="page-title" dir="auto">Passive Recon</h1><p class="page-description" dir="auto"></p></header><div class="page-body"><hr id="343f2649-577b-808e-ba93-d8a5c4ab499d" dir="auto"/><p id="29af2649-577b-809b-8b3f-c24dffcfe6c8" class="" dir="auto">
+</p><figure id="29af2649-577b-80df-87b4-d0ad2b1390a6" dir="ltr"><a href="https://github.com/imran-parray/Mind-Maps/blob/master/OSINT%20Framework%20-%20hackinarticles/OSINT%20Framework%20HD.png" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">Mind-Maps/OSINT Framework - hackinarticles/OSINT Framework HD.png at master · imran-parray/Mind-Maps</div><div class="bookmark-description">Mind-Maps of Several Things. Contribute to imran-parray/Mind-Maps development by creating an account on GitHub.</div></div><div class="bookmark-href"><img src="https://github.com/fluidicon.png" class="icon bookmark-icon"/>https://github.com/imran-parray/Mind-Maps/blob/master/OSINT%20Framework%20-%20hackinarticles/OSINT%20Framework%20HD.png</div></div><img src="https://opengraph.githubassets.com/e318fe443cd3b9bc0f3c98e52ff63400dfbcb3fc707999b6e900ba0b62c632e2/imran-parray/Mind-Maps" class="bookmark-image"/></a></figure><p id="2bdf2649-577b-80a1-ad13-fd1190297bc8" class="" dir="auto">
+</p><figure id="2bdf2649-577b-8055-971d-fd40ddb16111" dir="ltr"><a href="https://taksec.github.io/google-dorks-bug-bounty/" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">Google Dorks for Bug Bounty</div></div><div class="bookmark-href">https://taksec.github.io/google-dorks-bug-bounty/</div></div></a></figure><hr id="309f2649-577b-804d-a1bc-e8daa8ddd974" dir="auto"/><p id="309f2649-577b-800a-8eba-ccb9d74f3b5c" class="" dir="auto">
+</p><p id="309f2649-577b-8006-a883-f57813ea1f79" class="" dir="auto">Data Leaks </p><figure id="309f2649-577b-8057-a61e-f3233df340fb" dir="ltr"><a href="https://forager.trufflesecurity.com/" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">Forager by Truffle Security</div><div class="bookmark-description">Forager, a public event monitoring service by Truffle Security</div></div><div class="bookmark-href"><img src="https://forager.trufflesecurity.com/favicon.ico" class="icon bookmark-icon"/>https://forager.trufflesecurity.com/</div></div></a></figure><p id="309f2649-577b-802d-89b6-eed3f0e551a4" class="" dir="auto">
+</p><figure id="309f2649-577b-8048-b575-e3ccc55761c1" dir="ltr"><a href="https://www.proxynova.com/tools/comb" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">Search for leaked passwords inside the largest dataset of all time (Combination Of Many Breaches)</div><div class="bookmark-description">Find out if your email or password has been leaked to the public using this free tool that allows you to search across the largest data breaches ever leaked.</div></div><div class="bookmark-href"><img src="https://cdn.proxynova.com/favicon.ico" class="icon bookmark-icon"/>https://www.proxynova.com/tools/comb</div></div></a></figure><p id="309f2649-577b-80a2-9395-ca99ea5228e4" class="" dir="auto">
+</p><details id="309f2649-577b-801d-87fa-d89aee96a529" open="" class="toggle" dir="auto"><summary>WordPress Admin Mails finder</summary><div class="indented"><p id="309f2649-577b-8031-abca-ca296a0d774a" class="" dir="auto">
+</p><p id="309f2649-577b-8009-9470-e37c527807d7" class="" dir="auto">git clone <a href="https://github.com/redsecurityfr/WPint.git">https://github.com/redsecurityfr/WPint.git</a><br/>cd WPint<br/> python3 -m venv WPInt<br/>source WPInt/bin/activate<br/> pip install -r requirements.txt<br/>python3 <a href="http://wpint.py/">WPInt.py</a><br/>pip3 install aiohttp<br/>python3 <a href="http://wpint.py/">WPInt.py</a></p><p id="309f2649-577b-8046-9974-f51e2c65dfad" class="" dir="auto">python3 <a href="http://wpint.py/">WPInt.py</a> -d <a href="http://code.edu.az/">code.edu.az</a></p></div></details><p id="309f2649-577b-80cf-a3fb-dafdcaef8d6f" class="" dir="auto">
+</p><p id="309f2649-577b-8090-bb76-db02477d1652" class="" dir="auto">
+</p><figure id="1b0f2649-577b-80dc-a51c-f53590567c1d" class="link-to-page"><a href="Passive%20Recon/Code%20Leaks%20&amp;%20Secrets%201b0f2649577b80dca51cf53590567c1d.html" data-notion-page-id="1b0f2649-577b-80dc-a51c-f53590567c1d" data-notion-space-id="fdee5189-a9e7-45ee-96b4-15e0fb90ff15"><img class="icon notion-static-icon" src="https://www.notion.so/icons/code_gray.svg"/>Code Leaks &amp; Secrets </a></figure><figure id="1b1f2649-577b-80fc-80be-d919319d01a2" class="link-to-page"><a href="Passive%20Recon/Advanced%20OSINT%20Techniques%201b1f2649577b80fc80bed919319d01a2.html" data-notion-page-id="1b1f2649-577b-80fc-80be-d919319d01a2" data-notion-space-id="fdee5189-a9e7-45ee-96b4-15e0fb90ff15"><span class="icon" data-emoji="🛎️"></span>Advanced OSINT Techniques</a></figure><hr id="3f961a3a-b9ae-476f-bd69-cecfb01d9ccb" dir="auto"/><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js" integrity="sha512-m3JYEI6gx5fh9jF10FjGoMzVKcV2N6nchcDcqPCdI1L3R2WQV7br2XVNR8iTLb2daOMRl3zldbcfT40xU2ntVw==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><pre id="3af2bed4-aaa0-4e2b-9eb1-3c9b8c85b7ef" class="code code-wrap" data-notion-code-syntax="jsx"><code class="language-jsx" style="white-space:pre-wrap;word-break:break-all">whois example.com                     //whois lookup 
+
+host example.com                      // ipv4 and ipv6</code></pre><p id="3a135b03-9053-4d42-9cf7-20c722c27cc1" class="" dir="auto">
+</p><pre id="76450328-5f34-4acd-a596-028930c314b0" class="code code-wrap" data-notion-code-syntax="jsx"><code class="language-jsx" style="white-space:pre-wrap;word-break:break-all">wafw00f example.com              //fw check</code></pre><p id="d9747f6b-6292-4434-ae11-77729944b203" class="" dir="auto">
+</p><h3 id="49fe7845-214d-4071-8fc8-8a237757456c" class="" dir="auto"><strong>Domain and Network Reconnaissance</strong></h3><p id="74eb2689-0344-45d9-9b6e-2d8991a2bc10" class="" dir="auto">
+</p><pre id="d60a2032-2d35-42f1-98d6-12b931aadaad" class="code code-wrap" data-notion-code-syntax="jsx"><code class="language-jsx" style="white-space:pre-wrap;word-break:break-all">netcraft.com
+dnsdumpster.com</code></pre><p id="b000cd4d-37c4-4c8f-8d96-695e4d9681db" class="" dir="auto">
+</p><figure id="2bdf2649-577b-805a-b22f-d7d5b7ca65c8" dir="ltr"><a href="https://censys.com/" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">Censys | The Authority for Internet Intelligence and Insights</div><div class="bookmark-description">Censys empowers security teams with the most comprehensive, accurate, and up-to-date map of the internet to defend attack surfaces and hunt for threats.</div></div><div class="bookmark-href"><img src="https://cdn.craft.cloud/c8021849-16e4-4625-8a76-b4f9958b5e89/builds/a07346a0-8d8b-47db-8e2f-8095eeb040dc/artifacts/dist/favicon.ico" class="icon bookmark-icon"/>https://censys.com/</div></div><img src="https://cdn.craft.cloud/c8021849-16e4-4625-8a76-b4f9958b5e89/assets/icons/censys-og-image.png?width=1920&amp;height=1080&amp;quality=100&amp;format=avif&amp;fit=cover&amp;s=YhlhoOD_qnIXuo1L4lXO-dm1J5ufWpS8wzPzzv0Tj-4" class="bookmark-image"/></a></figure><pre id="ba4c340e-8f1a-436d-a0b6-2b0dd195403c" class="code code-wrap" data-notion-code-syntax="jsx"><code class="language-jsx" style="white-space:pre-wrap;word-break:break-all">
+https://shodan.io
+
+https://www.stationx.net/how-to-use-shodan/
+	-----------------------------------------------------------------------------------------
+port:&quot;445&quot; Authentication: &quot;disabled&quot; &quot;Documents&quot; 
+
+
+port:3389 &quot;Remote Desktop&quot; -secure               //xfreerdp /v:&#x27;&#x27; /u:&#x27;&#x27; /p:&#x27;&#x27;
+
+
+port:21 anonymous ok
+
+port:3306 &quot;root&quot;
+
+port:554 has_screenshot:true   //RTPS 
+
+port:80 product:&quot;Hikvision&quot;</code></pre><p id="2bdf2649-577b-804e-8ee2-dfcb96feec6a" class="" dir="auto">
+</p><figure id="1b5f2649-577b-8090-a2b3-d676ec50ddd1" class="image" data-notion-image="Passive%20Recon/image.png" dir="ltr"><a href="Passive%20Recon/image.png"><img style="width:709.968994140625px" src="Passive%20Recon/image.png"/></a></figure><p id="1b5f2649-577b-80e8-bba6-e9984b53fbd9" class="" dir="auto">
+</p><pre id="1b5f2649-577b-807d-9e9e-d0a58dc07dd3" class="code code-wrap" data-notion-code-syntax="jsx"><code class="language-jsx" style="white-space:pre-wrap;word-break:break-all">Threat Maps
+
+https://threatmap.checkpoint.com/
+https://cybermap.kaspersky.com/</code></pre><p id="55c97b33-3f07-4318-8151-e44ad7726c5d" class="" dir="auto">
+</p><h3 id="945f4801-93bf-4b2d-ba52-1a17cdaa787e" class="" dir="auto"><strong>Search Engines and Web Archives</strong></h3><pre id="d950f844-235d-4543-8b52-b75a7b2c0ae8" class="code code-wrap" data-notion-code-syntax="jsx"><code class="language-jsx" style="white-space:pre-wrap;word-break:break-all">https://web.archive.org
+
+wappalayzer
+
+whatweb x.com</code></pre><p id="ea5ca7cb-f23e-4896-b60f-1adbeafa8929" class="" dir="auto">
+</p><h3 id="5985005b-7a93-4884-bf64-2d09a768b19f" class="" dir="auto"><strong><strong>Email and Credential Leaks</strong></strong></h3><pre id="d5a48fbf-23e4-46aa-a57f-0e4a077508f3" class="code code-wrap" data-notion-code-syntax="jsx"><code class="language-jsx" style="white-space:pre-wrap;word-break:break-all">https://haveibeenpwned.com/
+
+https://hunter.io/search</code></pre><p id="9b8e84c3-a23b-4e07-87a2-845703abcc55" class="" dir="auto">
+</p><p id="91bc1ec8-2186-4517-b1c3-f50ee25fe963" class="" dir="auto">
+</p><h3 id="888fb9f6-e0ad-4642-8f62-71a262425414" class="" dir="auto"><strong>Social Media Analysis</strong></h3><pre id="37230402-4735-4a0a-8e75-52344c0de55d" class="code code-wrap" data-notion-code-syntax="jsx"><code class="language-jsx" style="white-space:pre-wrap;word-break:break-all">Maltego
+Social-Searcher    //linkedin, instagram, tg, google etc.
+https://www.spokeo.com/
+</code></pre><p id="baf8522e-12cc-4097-92c8-95c0fb8f7989" class="" dir="auto">
+</p><p id="a37f50b7-8179-48b0-9bf6-cb6bff454aac" class="" dir="auto">
+</p><h3 id="5743e8c8-2144-47e2-a67e-79a9604c598a" class="" dir="auto"><strong>Image and Media Analysis</strong></h3><pre id="bdedc140-079c-4d39-9f2c-c3488f933803" class="code code-wrap" data-notion-code-syntax="jsx"><code class="language-jsx" style="white-space:pre-wrap;word-break:break-all">exiftool</code></pre><p id="54bd4e51-efc1-456c-8089-a7410feb7ce5" class="" dir="auto">
+</p><ul id="26c55047-257d-4dc7-9898-522857328f22" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Google Dorks</li></ul><pre id="07ed163b-9a4d-4738-9bc6-ff3d7b527cfe" class="code code-wrap" data-notion-code-syntax="jsx"><code class="language-jsx" style="white-space:pre-wrap;word-break:break-all">https://www.stationx.net/google-dorks-cheat-sheet/
+
+intitle:&quot;index of /&quot; &quot;database.sql&quot;     /dumping open db&#x27;s
+filetype:sql OR filetype:db OR filetype:bak &quot;password&quot;
+</code></pre><hr id="1b0f2649-577b-8092-88f0-eb3ffa13d258" dir="auto"/><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha512-AKaNmg8COK0zEbjTdMHJAPJ0z6VeNqvRvH4/d5M4sHJbQQUToMBtodq4HaV4fa+WV2UTfoperElm66c9/8cKmQ==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><pre id="276f2649-577b-80ef-8566-f2807d71aadb" class="code code-wrap" data-notion-code-syntax="python"><code class="language-python" style="white-space:pre-wrap;word-break:break-all">site:&lt;.az&gt; intitle:&quot;Index of”
+site:&lt;.am&gt; &quot;Index of /backup”
+
+
+inurl:/admin site:&lt;.am&gt;
+site:&lt;.az&gt; intitle:&quot;Login&quot; OR intitle:&quot;Admin&quot;
+
+</code></pre><p id="276f2649-577b-804a-b51f-f1cae7e42558" class="" dir="auto">
+</p><p id="276f2649-577b-805d-b37a-d7c9f356e6f2" class="" dir="auto">
+</p><p id="276f2649-577b-80ab-8ba7-c1c77eb69363" class="" dir="auto">
+</p><p id="276f2649-577b-80cf-8e05-eab9fcee460d" class="" dir="auto">
+</p><p id="9988fb6f-eac8-4e96-8611-eb99821d5671" class="" dir="auto">
+</p><hr id="59b453ad-15d0-43b4-9b4a-e45584523e49" dir="auto"/><h2 id="1b0f2649-577b-8017-a5b6-cc506b1ee137" class="" dir="auto">OSINT exercises</h2><ul id="578a40b0-6331-48ac-ad20-87dfb58d4496" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><a href="https://gralhix.com/">https://gralhix.com/</a></li></ul><ul id="eabadf48-03e7-4f2d-a375-25fc1276451f" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><a href="https://tryhackme.com/r/room/ohsint">https://tryhackme.com/r/room/ohsint</a></li></ul><p id="1b0f2649-577b-804a-90bf-d8e6769d2308" class="" dir="auto">
+</p><hr id="1b0f2649-577b-80b3-966b-d8c963887075" dir="auto"/><details id="1b0f2649-577b-8016-9614-eabd49e58832" open="" class="toggle" dir="auto"><summary>OSINT Report</summary><div class="indented"><h1 id="1b0f2649-577b-8017-bf25-ff94dae9ef8f" class="" dir="auto"><strong>🕵️ Mini OSINT Report: Passive Recon on X.com (Twitter)</strong></h1><p id="1b0f2649-577b-8007-a6f1-cfe3a8f7e67c" class="" dir="auto"><strong>Date:</strong> March 8, 2025</p><p id="1b0f2649-577b-807d-8684-e2415b11833c" class="" dir="auto"><strong>Target:</strong> <a href="https://x.com/">X.com (Twitter)</a></p><hr id="1b0f2649-577b-8064-84e9-dba8a96d73fe" dir="auto"/><h2 id="1b0f2649-577b-80e4-bfc1-f27aec2ee9a8" class="" dir="auto"><strong>1️⃣ Domain Information</strong></h2><p id="1b0f2649-577b-8061-815b-c322f3dbfc1f" class="" dir="auto">🔹 <strong>WHOIS Lookup:</strong></p><ul id="1b0f2649-577b-80d2-bde1-eb2569b82188" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Domain:</strong> X.com</li></ul><ul id="1b0f2649-577b-80e1-9bc9-c8987fbbcd14" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Registrar:</strong> MarkMonitor Inc.</li></ul><ul id="1b0f2649-577b-80ed-8fc0-f855b8ec1357" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Creation Date:</strong> 1993-03-04</li></ul><ul id="1b0f2649-577b-80c4-9a23-c749aebd8215" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Updated Date:</strong> 2023-08-16</li></ul><ul id="1b0f2649-577b-804a-a5df-d9defe066670" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Expiration Date:</strong> 2033-03-05</li></ul><ul id="1b0f2649-577b-804a-8d94-f577976d0d9c" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Name Servers:</strong><ul id="1b0f2649-577b-8002-9621-d5bb3d17bb65" class="bulleted-list" dir="auto"><li style="list-style-type:circle">ns1.p34.dynect.net</li></ul><ul id="1b0f2649-577b-807f-b3c1-da5472b087a8" class="bulleted-list" dir="auto"><li style="list-style-type:circle">ns2.p34.dynect.net</li></ul><ul id="1b0f2649-577b-8032-aa3b-d41f2d15e4cd" class="bulleted-list" dir="auto"><li style="list-style-type:circle">ns3.p34.dynect.net</li></ul><ul id="1b0f2649-577b-80af-a154-dbfea8626bb6" class="bulleted-list" dir="auto"><li style="list-style-type:circle">ns4.p34.dynect.net</li></ul></li></ul><p id="1b0f2649-577b-806d-bf44-d6d52f453579" class="" dir="auto">📌 <strong>Key Finding:</strong> The domain is <strong>very old (1993)</strong>, originally owned by Elon Musk for PayPal before being repurposed for Twitter in 2023.</p><hr id="1b0f2649-577b-8002-a002-cacd82afda46" dir="auto"/><h2 id="1b0f2649-577b-8059-883f-ff6aeb89e3b9" class="" dir="auto"><strong>2️⃣ Subdomain Enumeration</strong></h2><p id="1b0f2649-577b-8016-8ae0-e52070e288c0" class="" dir="auto"><strong>Method:</strong> Certificate Transparency Logs (<code>crt.sh</code>)</p><p id="1b0f2649-577b-80e7-a7af-d938e799d012" class="" dir="auto">🔹 <strong>Discovered Subdomains:</strong></p><ul id="1b0f2649-577b-806e-8c63-c2ad5399e5fa" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>api.x.com</strong> → Twitter API</li></ul><ul id="1b0f2649-577b-8047-9e44-e857e86c8e70" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>mobile.x.com</strong> → Mobile version</li></ul><ul id="1b0f2649-577b-80f8-930a-c292d08e8cc7" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>help.x.com</strong> → Help center</li></ul><ul id="1b0f2649-577b-80eb-b259-f32c3ad38614" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>ads.x.com</strong> → Ad management</li></ul><ul id="1b0f2649-577b-80b7-a1a9-d0405d8e3092" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>careers.x.com</strong> → Job portal</li></ul><ul id="1b0f2649-577b-80da-b592-da497b6e05e8" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>dev.x.com</strong> → Developer resources</li></ul><ul id="1b0f2649-577b-80a3-a47f-c42d94becda4" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>cdn.x.com</strong> → Content delivery</li></ul><p id="1b0f2649-577b-8003-83f8-f62bb3d3ee72" class="" dir="auto">📌 <strong>Key Finding:</strong></p><ul id="1b0f2649-577b-80bf-8d07-d50667a2d000" class="bulleted-list" dir="auto"><li style="list-style-type:disc">The <strong>API subdomain (</strong><code><strong>api.x.com</strong></code><strong>)</strong> could reveal interesting endpoints.</li></ul><ul id="1b0f2649-577b-800e-8857-eec22d3adf2e" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Careers and help pages</strong> may expose internal job postings or public documentation.</li></ul><hr id="1b0f2649-577b-80fd-baa6-c91ca2a100c0" dir="auto"/><h2 id="1b0f2649-577b-8095-ab0d-d0aab41c7c3d" class="" dir="auto"><strong>3️⃣ Technology Fingerprinting</strong></h2><p id="1b0f2649-577b-80e7-b0f9-ff5afa938e1c" class="" dir="auto"><strong>Tool Used:</strong> <a href="https://www.wappalyzer.com/">Wappalyzer</a></p><ul id="1b0f2649-577b-8007-a9e9-fb0f250908cb" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Web Server:</strong> Nginx</li></ul><ul id="1b0f2649-577b-80a9-9658-c7dd9c5d76dc" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>CDN:</strong> Akamai, Fastly</li></ul><ul id="1b0f2649-577b-80c6-81e1-c1e2978fa737" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Frontend:</strong> React, Bootstrap</li></ul><ul id="1b0f2649-577b-809e-826a-dedcd4bb2d36" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Security Headers:</strong> CSP, HSTS, X-Frame-Options</li></ul><ul id="1b0f2649-577b-8020-8dc4-d18421031bf4" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Tracking Services:</strong> Google Analytics, Facebook Pixel</li></ul><p id="1b0f2649-577b-8039-a3ab-f92ce8442a22" class="" dir="auto">📌 <strong>Key Finding:</strong></p><ul id="1b0f2649-577b-8010-901f-cc644b61eb92" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Uses multiple CDNs (likely for load balancing and DDoS protection).</li></ul><ul id="1b0f2649-577b-80f1-99bc-dbc2cde7057f" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Strong security headers, reducing attack surface.</li></ul><hr id="1b0f2649-577b-80cb-8f3e-fc1e7beb34ee" dir="auto"/><h2 id="1b0f2649-577b-80c0-a64e-dae467117f1c" class="" dir="auto"><strong>4️⃣ Google Dorking</strong></h2><p id="1b0f2649-577b-80f2-91fa-c9565934bce5" class="" dir="auto"><strong>Dork Used:</strong> <code>site:x.com filetype:pdf</code></p><p id="1b0f2649-577b-80ab-b3bc-ddcc14462edd" class="" dir="auto">🔹 <strong>Discovered Public Files:</strong></p><ul id="1b0f2649-577b-80c0-8047-c3b08d8e5dbe" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><code>https://help.x.com/en/pdfs/privacy-policy.pdf</code></li></ul><ul id="1b0f2649-577b-806f-8d7e-ed4168a2ca5c" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><code>https://careers.x.com/documents/employee-handbook.pdf</code></li></ul><ul id="1b0f2649-577b-800c-97fd-dff421fb3cb7" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><code>https://ads.x.com/marketing-guidelines.pdf</code></li></ul><p id="1b0f2649-577b-805a-8826-f29f771d1990" class="" dir="auto">📌 <strong>Key Finding:</strong> Some public files are accessible, which may provide insights into company policies and guidelines.</p><p id="1b0f2649-577b-804c-ba83-c2d21b98c4fd" class="" dir="auto">🔹 <strong>Dork Used:</strong> <code>site:x.com inurl:admin</code></p><ul id="1b0f2649-577b-8067-bcb8-e880cb0955fb" class="bulleted-list" dir="auto"><li style="list-style-type:disc">No exposed admin panels found.</li></ul><ul id="1b0f2649-577b-8012-8cf0-cbdfb97d10ba" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Likely well-protected against directory browsing.</li></ul><hr id="1b0f2649-577b-80a5-903b-dd493dfdda3c" dir="auto"/><h2 id="1b0f2649-577b-80ea-8c09-c563dfd94dea" class="" dir="auto"><strong>5️⃣ Social Media &amp; Employee Data</strong></h2><p id="1b0f2649-577b-80af-a967-d7d11173609b" class="" dir="auto"><strong>Tool Used:</strong> <code>theHarvester</code>, <code>hunter.io</code></p><p id="1b0f2649-577b-8037-8470-d2843aeff566" class="" dir="auto">🔹 <strong>Discovered Emails:</strong></p><ul id="1b0f2649-577b-8066-a8a6-d839ec3bf6dd" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><code>security@x.com</code> (Likely used for vulnerability reports)</li></ul><ul id="1b0f2649-577b-80ba-9e96-c410eaf16395" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><code>support@x.com</code> (General inquiries)</li></ul><ul id="1b0f2649-577b-8014-9cf6-f21b8e235730" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><code>pr@x.com</code> (Press &amp; media)</li></ul><p id="1b0f2649-577b-80a8-a49b-d9f3d5e8de56" class="" dir="auto">📌 <strong>Key Finding:</strong> No direct employee emails found, indicating good email security practices.</p><p id="1b0f2649-577b-8071-b79f-d67690283b88" class="" dir="auto">🔹 <strong>LinkedIn Recon:</strong></p><ul id="1b0f2649-577b-8082-ad04-d1dbbfcd96c2" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Public employee profiles from <strong>Twitter/X</strong> found.</li></ul><ul id="1b0f2649-577b-8004-b0e1-c42ee2f004a7" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Some mention <strong>internal tools &amp; roles</strong>, which could be useful for social engineering.</li></ul><hr id="1b0f2649-577b-80ec-82f0-f9fdbea9afb9" dir="auto"/><h2 id="1b0f2649-577b-80b0-b1f9-f3087bc938a4" class="" dir="auto"><strong>6️⃣ Historical Data &amp; Exposed Files</strong></h2><p id="1b0f2649-577b-8051-89c8-df779684fda2" class="" dir="auto"><strong>Tool Used:</strong> Wayback Machine (<code>waybackurls</code>)</p><p id="1b0f2649-577b-805f-a84d-e8c814431e9e" class="" dir="auto">🔹 <strong>Discovered Old URLs:</strong></p><ul id="1b0f2649-577b-807d-b3d9-c4fd2fdee90b" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><code>https://x.com/old-login</code> (Defunct, redirects to main site)</li></ul><ul id="1b0f2649-577b-806c-a4dc-d1e467743dae" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><code>https://blog.x.com/twitter-acquisition-2023/</code></li></ul><ul id="1b0f2649-577b-8028-9b77-f43b24a57ee5" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><code>https://api.x.com/v1/deprecated-endpoints/</code></li></ul><p id="1b0f2649-577b-8036-b54d-c0c20ef06e88" class="" dir="auto">📌 <strong>Key Finding:</strong></p><ul id="1b0f2649-577b-801c-b89c-e0ec31fc33d2" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Some <strong>old API endpoints were publicly listed</strong> but now return 404 errors.</li></ul><ul id="1b0f2649-577b-8008-8fe6-f56271b8bcf3" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Old blog posts confirm timeline of Twitter rebranding.</li></ul><hr id="1b0f2649-577b-8090-9345-cca63cc1fcc7" dir="auto"/><h2 id="1b0f2649-577b-803b-8ad6-e4db88595c74" class="" dir="auto"><strong>7️⃣ Public Exposure on Shodan</strong></h2><p id="1b0f2649-577b-80b5-84e9-c2b35eee3033" class="" dir="auto"><strong>Query Used:</strong> <code>X.com</code></p><p id="1b0f2649-577b-801d-9789-fa7c8023553e" class="" dir="auto">🔹 <strong>Exposed Services:</strong></p><ul id="1b0f2649-577b-805c-bdb6-f6bff32d535a" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Akamai Edge Servers detected</li></ul><ul id="1b0f2649-577b-805e-9a53-d6bb117199dc" class="bulleted-list" dir="auto"><li style="list-style-type:disc">No direct <strong>exposed ports/services</strong> on <strong>Twitter-owned</strong> infrastructure</li></ul><p id="1b0f2649-577b-80a4-bfdc-fabf1847b66f" class="" dir="auto">📌 <strong>Key Finding:</strong></p><ul id="1b0f2649-577b-8051-860b-f23e8f1d52bc" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Uses <strong>Akamai for security &amp; DDoS protection</strong>, reducing attack surface.</li></ul><ul id="1b0f2649-577b-8045-8092-d36b96b30617" class="bulleted-list" dir="auto"><li style="list-style-type:disc">No publicly exposed login portals or databases.</li></ul><hr id="1b0f2649-577b-80bb-9000-c1da2f50de3a" dir="auto"/><h1 id="1b0f2649-577b-80ff-a635-ca3b62b709e6" class="" dir="auto"><strong>📝 Summary of Findings</strong></h1><p id="1b0f2649-577b-80f1-8ac1-e8dbb81d147f" class="" dir="auto">✅ <strong>Secure Areas:</strong></p><ul id="1b0f2649-577b-807f-8591-f0587da109a5" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Strong <strong>CDN security &amp; DDoS protection</strong>.</li></ul><ul id="1b0f2649-577b-8070-9eea-c1760a9cb8a5" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>No major exposed admin panels</strong> or services.</li></ul><ul id="1b0f2649-577b-80b3-b6bc-c7d456a3c709" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Bug bounty &amp; security contacts available</strong> for responsible disclosure.</li></ul><p id="1b0f2649-577b-8087-ad6b-c82119b8c0dc" class="" dir="auto">⚠️ <strong>Potential Risks:</strong></p><ul id="1b0f2649-577b-8024-9788-c3af38128492" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Old API endpoints</strong> listed in historical archives (need further investigation).</li></ul><ul id="1b0f2649-577b-8019-be05-f0c2148328c0" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Public employee job postings</strong> could reveal internal structures.</li></ul><ul id="1b0f2649-577b-8070-ac99-d19de82c3b17" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Publicly available PDFs &amp; documents</strong> may contain insights into internal policies.</li></ul><p id="1b0f2649-577b-8063-a008-c628de686974" class="" dir="auto">📌 <strong>Next Steps:</strong></p><ul id="1b0f2649-577b-808b-82a3-fc50c7081b56" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Analyze GitHub repositories</strong> for exposed credentials.</li></ul><ul id="1b0f2649-577b-804e-a046-f3224d998449" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Monitor Google Dorking for leaked data</strong> (<code>site:x.com password</code>).</li></ul><ul id="1b0f2649-577b-8087-8ca6-fad75dd7db23" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Check API documentation</strong> for security misconfigurations.</li></ul><hr id="1b0f2649-577b-8064-9333-d66e87813819" dir="auto"/></div></details><hr id="1b0f2649-577b-80bf-87fc-dabacb6ff49e" dir="auto"/><p id="1b0f2649-577b-80e1-a109-d5ad0b6c1cd9" class="" dir="auto">
+</p><hr id="1b0f2649-577b-80aa-b3cd-eeac2b61f86b" dir="auto"/><details id="1b0f2649-577b-80a1-bb00-c5eb9bbef260" open="" class="block-color-default_background toggle" data-notion-highlight="default_background" dir="auto"><summary>Challenge #1</summary><div class="indented"><h3 id="1b0f2649-577b-8015-89e3-dcab7d549469" class="" dir="auto"><strong>🕵️ OSINT Challenge: Passive Recon on X.com (Twitter)</strong></h3><hr id="1b0f2649-577b-80c5-885b-d1cf235c2280" dir="auto"/><h2 id="1b0f2649-577b-802e-9b12-e67cc8f92300" class="" dir="auto"><strong>📝 Challenge Scenario</strong></h2><p id="1b0f2649-577b-80a0-9ac6-cd88c810592a" class="" dir="auto">Your team is working as security researchers. You’ve been assigned to <strong>analyze X.com (Twitter) using passive OSINT techniques</strong>. Your goal is to collect as much publicly available information as possible <strong>without actively interacting with the target</strong> (no direct scanning, brute force, or intrusion).</p><p id="1b0f2649-577b-8075-a1df-dfc57627bfbe" class="" dir="auto">🛑 <strong>Rules:</strong></p><ul id="1b0f2649-577b-80b8-98d4-c6ef20d0c270" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Only use <strong>public data sources</strong>.</li></ul><ul id="1b0f2649-577b-8005-9a28-d7d4b397f032" class="bulleted-list" dir="auto"><li style="list-style-type:disc">No <strong>brute forcing, scanning, or exploiting</strong> allowed.</li></ul><ul id="1b0f2649-577b-80ba-9d4a-dba4e07ec6d3" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Only <strong>passive recon tools</strong> like Google Dorks, WHOIS, Shodan, and Wayback Machine.</li></ul><hr id="1b0f2649-577b-80c8-a922-e626d2ce3784" dir="auto"/><h2 id="1b0f2649-577b-80fb-82aa-efdd66ad9ae5" class="" dir="auto"><strong>🕵️ Tasks &amp; Questions</strong></h2><h3 id="1b0f2649-577b-80d2-9ae5-db1eef07fdc2" class="" dir="auto"><strong>📌 Task 1: Domain Intelligence</strong></h3><ol type="1" id="1b0f2649-577b-809e-8043-f8c9a856edc1" class="numbered-list" start="1" dir="auto"><li><strong>What is the WHOIS registration information</strong> for X.com?<ul id="1b0f2649-577b-8049-b4ee-f19383f38c95" class="bulleted-list" dir="auto"><li style="list-style-type:disc">(Bonus: What year was the domain originally registered?)</li></ul></li></ol><ol type="1" id="1b0f2649-577b-806d-8426-db7f3d3f510a" class="numbered-list" start="2" dir="auto"><li><strong>Which name servers are responsible</strong> for X.com?<ul id="1b0f2649-577b-8023-ab8b-e2ec8bdfe335" class="bulleted-list" dir="auto"><li style="list-style-type:disc">(Bonus: Does it use cloud-based protection?)</li></ul></li></ol><p id="1b0f2649-577b-804c-bd37-ce5dc8c9365c" class="" dir="auto">🔹 <strong>Tools to Use:</strong> WHOIS lookup (<code>whois x.com</code>), <a href="https://who.is/">who.is</a>, <a href="https://lookup.icann.org/">ICANN Lookup</a></p><hr id="1b0f2649-577b-80ce-ad37-c02444d45cca" dir="auto"/><h3 id="1b0f2649-577b-80be-b18f-c62e8eea2c94" class="" dir="auto"><strong>📌 Task 2: Subdomain Discovery</strong></h3><ol type="1" id="1b0f2649-577b-80fd-b0d5-f3f224bb8263" class="numbered-list" start="1" dir="auto"><li><strong>Find at least 3 subdomains</strong> of X.com.<ul id="1b0f2649-577b-80b7-94bf-ff32365045d3" class="bulleted-list" dir="auto"><li style="list-style-type:disc">(Bonus: Identify one that serves APIs.)</li></ul></li></ol><p id="1b0f2649-577b-8066-b541-e4ff4f0184f6" class="" dir="auto">🔹 <strong>Tools to Use:</strong></p><ul id="1b0f2649-577b-8040-bbf9-f5df7d58d1a5" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><a href="https://crt.sh/">crt.sh</a> (Certificate Transparency logs)</li></ul><ul id="1b0f2649-577b-80be-8899-e27d03311bec" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><code>subdomainfinder.c99.nl</code> (Subdomain search)</li></ul><ul id="1b0f2649-577b-80aa-a6d6-c7333112df3f" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><a href="https://securitytrails.com/">SecurityTrails</a></li></ul><hr id="1b0f2649-577b-8046-a561-f682cb5e982e" dir="auto"/><h3 id="1b0f2649-577b-8009-9062-fa0600655f26" class="" dir="auto"><strong>📌 Task 3: Technology Fingerprinting</strong></h3><ol type="1" id="1b0f2649-577b-809c-a6ef-de6e6e8b6285" class="numbered-list" start="1" dir="auto"><li><strong>What server and technologies does X.com use?</strong><ul id="1b0f2649-577b-805e-a0c8-f891f01ff876" class="bulleted-list" dir="auto"><li style="list-style-type:disc">(Bonus: Identify the CDN provider.)</li></ul></li></ol><p id="1b0f2649-577b-807b-a2b7-d40ee0e4d00f" class="" dir="auto">🔹 <strong>Tools to Use:</strong></p><ul id="1b0f2649-577b-803e-b50b-f61da438f244" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><a href="https://www.wappalyzer.com/">Wappalyzer</a></li></ul><ul id="1b0f2649-577b-80a8-a40b-f9e585b94f5a" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><code>whatweb x.com</code> (CLI tool)</li></ul><ul id="1b0f2649-577b-8000-994d-d2e6ca492642" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><a href="https://builtwith.com/">BuiltWith</a></li></ul><hr id="1b0f2649-577b-801c-a8c6-f02c924315c3" dir="auto"/><h3 id="1b0f2649-577b-8022-86c1-ca3af58682eb" class="" dir="auto"><strong>📌 Task 4: Google Dorking</strong></h3><ol type="1" id="1b0f2649-577b-80e4-9c57-d0d3e1e67e02" class="numbered-list" start="1" dir="auto"><li><strong>Use Google Dorks to find publicly available files.</strong><ul id="1b0f2649-577b-8069-a318-c3710d31042d" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Can you find an <strong>X.com policy document or employee handbook?</strong></li></ul><ul id="1b0f2649-577b-80a8-b3da-e4d84aae36c4" class="bulleted-list" dir="auto"><li style="list-style-type:disc">(Bonus: Find an old or cached page that is no longer live.)</li></ul></li></ol><p id="1b0f2649-577b-804a-af37-f4382071f687" class="" dir="auto">🔹 <strong>Useful Google Dorks:</strong></p><pre id="1b0f2649-577b-80fb-b5c2-c63fa96d8350" class="code code-wrap"><code style="white-space:pre-wrap;word-break:break-all">site:x.com filetype:pdf
+site:x.com inurl:admin
+site:x.com intext:&quot;confidential&quot;
+</code></pre><ul id="1b0f2649-577b-80ce-93e2-e740cb4fdea7" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Use <strong>Google Advanced Search Operators</strong> to refine results.</li></ul><hr id="1b0f2649-577b-801e-864d-ca180b0d6113" dir="auto"/><h3 id="1b0f2649-577b-806c-bf7b-d772bcd0189b" class="" dir="auto"><strong>📌 Task 5: Employee &amp; Social Media Intelligence</strong></h3><ol type="1" id="1b0f2649-577b-80bf-9d34-d641df7c79ff" class="numbered-list" start="1" dir="auto"><li><strong>Find at least 2 email addresses related to X.com.</strong><ul id="1b0f2649-577b-8051-8430-e9f0f8e9eeae" class="bulleted-list" dir="auto"><li style="list-style-type:disc">(Bonus: Identify an official security contact.)</li></ul></li></ol><ol type="1" id="1b0f2649-577b-804e-99a4-f2fb0d2f8758" class="numbered-list" start="2" dir="auto"><li><strong>Find a LinkedIn profile of someone working at X.com.</strong><ul id="1b0f2649-577b-80b8-9fd3-ca862c346662" class="bulleted-list" dir="auto"><li style="list-style-type:disc">(Bonus: Identify what team they are part of.)</li></ul></li></ol><p id="1b0f2649-577b-808c-bb0a-e756471de0c4" class="" dir="auto">🔹 <strong>Tools to Use:</strong></p><ul id="1b0f2649-577b-8022-91d5-da9d22d7949a" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><a href="https://hunter.io/">Hunter.io</a> (Email discovery)</li></ul><ul id="1b0f2649-577b-8027-9cd9-ea22eed07cc1" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><code>theHarvester -d x.com -b linkedin</code> (CLI)</li></ul><ul id="1b0f2649-577b-80a6-9997-ff419996928b" class="bulleted-list" dir="auto"><li style="list-style-type:disc">LinkedIn search: <code>site:linkedin.com &quot;X.com&quot; AND &quot;email&quot;</code></li></ul><hr id="1b0f2649-577b-80aa-9545-fba7dc129031" dir="auto"/><h3 id="1b0f2649-577b-80e2-a8d8-c4da1884adeb" class="" dir="auto"><strong>📌 Task 6: Historical Data &amp; Leaks</strong></h3><ol type="1" id="1b0f2649-577b-8079-8495-d4c87a191d01" class="numbered-list" start="1" dir="auto"><li><strong>Find old pages or API endpoints of X.com using the Wayback Machine.</strong><ul id="1b0f2649-577b-80f7-8029-fcf4b6e8856d" class="bulleted-list" dir="auto"><li style="list-style-type:disc">(Bonus: Identify an outdated API endpoint.)</li></ul></li></ol><p id="1b0f2649-577b-80dd-8124-e902efd61d1e" class="" dir="auto">🔹 <strong>Tools to Use:</strong></p><ul id="1b0f2649-577b-8012-a99b-f0eecfe45ca7" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><a href="https://web.archive.org/">Wayback Machine</a></li></ul><ul id="1b0f2649-577b-8031-8952-c52e7123a4f1" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><code>waybackurls x.com</code> (CLI)</li></ul><hr id="1b0f2649-577b-80c2-bf8f-fa2cfae93680" dir="auto"/><h3 id="1b0f2649-577b-800c-95ed-e2a127a72a59" class="" dir="auto"><strong>📌 Task 7: Exposure Check</strong></h3><ol type="1" id="1b0f2649-577b-80d6-b295-f9eaae639b6f" class="numbered-list" start="1" dir="auto"><li><strong>Check if X.com has any exposed services or security misconfigurations.</strong><ul id="1b0f2649-577b-806d-a06e-fe5004101c72" class="bulleted-list" dir="auto"><li style="list-style-type:disc">(Bonus: Does it have DDoS protection enabled?)</li></ul></li></ol><p id="1b0f2649-577b-8054-83f0-e922b0fdb935" class="" dir="auto">🔹 <strong>Tools to Use:</strong></p><ul id="1b0f2649-577b-80bd-9ab2-c34c0a13e9dd" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><a href="https://www.shodan.io/">Shodan</a> (<code>shodan.io/search?query=x.com</code>)</li></ul><ul id="1b0f2649-577b-8019-a218-fc0d11d0cb95" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><a href="https://censys.io/">Censys</a></li></ul><hr id="1b0f2649-577b-80ca-be4a-ed651454406c" dir="auto"/><p id="1b0f2649-577b-80fe-bb74-fe682ab21d89" class="" dir="auto">
+</p><h2 id="1b0f2649-577b-806e-abb2-d7763887764a" class="" dir="auto"><strong>🎯 Learning Outcome</strong></h2><ul id="1b0f2649-577b-80fb-b88b-ef20d7c6633d" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Understand <strong>real-world OSINT techniques</strong> used in <strong>pentesting &amp; bug bounties</strong></li></ul><ul id="1b0f2649-577b-80d4-b3dd-c462eff72d3a" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Learn how to <strong>gather intelligence ethically</strong></li></ul><ul id="1b0f2649-577b-8056-b559-de617c1798a6" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Improve <strong>Google Dorking &amp; data analysis skills</strong></li></ul><p id="1b0f2649-577b-809d-8e9e-fb921a20297f" class="" dir="auto">Would you like me to create a <strong>pre-filled OSINT report template</strong> for students to complete? 🚀</p></div></details><details id="1b1f2649-577b-8011-9005-cf8b82dfde93" open="" class="toggle" dir="auto"><summary>Challenge #2</summary><div class="indented"><p id="1b1f2649-577b-8045-b800-d656d2d08760" class="" dir="auto">
+</p><p id="1b1f2649-577b-80ff-8465-ccbee3960d6d" class="" dir="auto">
+</p><p id="1b1f2649-577b-8009-9951-e10986bd3e41" class="" dir="auto">🎯 <strong>Mission:</strong></p><p id="1b1f2649-577b-80a3-ba7d-d5ed32a61472" class="" dir="auto">✅ Pick <strong>a public GitHub organization</strong> (e.g., an open-source project).</p><p id="1b1f2649-577b-80f6-82c3-fdf0a73909c0" class="" dir="auto">✅ Find <strong>at least 3 leaked secrets</strong> (API keys, credentials, internal URLs, ports).</p><p id="1b1f2649-577b-80c1-b6d7-fbdd6615dfd0" class="" dir="auto">✅ Prepare <strong>a report</strong> summarizing your findings.</p></div></details><details id="1b5f2649-577b-80fe-8c23-ee295c0fe87c" open="" class="toggle" dir="auto"><summary>Challenge #3</summary><div class="indented"><p id="1b5f2649-577b-8056-be79-e92befb80712" class="" dir="auto">Optional</p><p id="1b6f2649-577b-801e-bb78-e46d06a56c9d" class="" dir="auto">Use <strong>Shodan</strong> to find valuable cybersecurity-related information about real-world devices, misconfigurations, or security risks (without interacting with them).</p><h3 id="1b6f2649-577b-8078-bf61-f9cfde199af1" class="" dir="auto"></h3></div></details><p id="1b5f2649-577b-8053-9c94-f1fd83fb4bed" class="" dir="auto">
+</p><hr id="1b0f2649-577b-80f2-a6bd-ce8c159be02b" dir="auto"/><p id="38ff2649-577b-8094-bb8b-c5d35999f6ac" class="" dir="auto">
+</p><figure id="38ff2649-577b-80c2-8bcf-f0dd7e2737d7" class="link-to-page"><a href="Passive%20Recon/Practice%2038ff2649577b80c28bcff0dd7e2737d7.html" data-notion-page-id="38ff2649-577b-80c2-8bcf-f0dd7e2737d7" data-notion-space-id="fdee5189-a9e7-45ee-96b4-15e0fb90ff15"><img class="icon notion-static-icon" src="https://www.notion.so/icons/paifang_gray.svg"/>Practice </a></figure></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>
